@@ -11,31 +11,68 @@
     <div class="wrap">
         <div class="main">
             <%- include("../main/nav")%>
-<div class="container">
-    <div class="page-header">
+            <div class="container">
+                <div class="page-header">
 
-        <h2 class="text-center" style="color: lightblue">Log in to your account.</h2>
+                    <h2 class="text-center" style="color: lightblue">Log in to your account.</h2>
 
-    </div>
-    <div>
-        <!-- Body&Content -->
+                </div>
+                <div>
+                    <!-- Body&Content -->
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-2">
 
-        <form class="form" action="/users/login/" method="post">
-            <input name="csrfmiddlewaretoken" type="hidden" value="AeJf0R9v0otIEEaY7hn3LZWfd4oK9grSEIFi5miS3afYiMsggq9PnquH31NPDJ8q">
-            <div class="form-group"><label class="control-label" for="id_username">Username</label><input name="username"
-                    title="" class="form-control" id="id_username" autofocus="" required="" type="text" maxlength="254"
-                    placeholder="Username"></div>
-            <div class="form-group"><label class="control-label" for="id_password">Password</label><input name="password"
-                    title="" class="form-control" id="id_password" required="" type="password" placeholder="Password"></div>
-            <div class="form-group">
-                <button name="submit" class="btn btn-primary btn-block">Log in</button>
+                            </div>
+                            <div class="col-md-8">
+                                <form action="/users/login" method="post">
+                                    <div class="form-group row">
+                                        <label for="email_address" class="col-md-4 col-form-label text-md-right">Username</label>
+                                        <div class="col-md-6">
+                                            <input type="text" id="email_address" class="form-control" name="username"
+                                                required autofocus>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label for="password" class="col-md-4 col-form-label text-md-right">Password</label>
+                                        <div class="col-md-6">
+                                            <input type="password" id="password" class="form-control" name="password"
+                                                required>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-md-8 offset-md-4">
+                                            <div class="checkbox">
+                                                <label>
+                                                    <input type="checkbox" name="remember"> Remember Me
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-10">
+                                        <input type="hidden" name="referer" value=<%=referer %> >
+                                        <button type="submit" class="btn btn-primary btn-block">
+                                            登录
+                                        </button>
+                                        <a href="#" class="btn btn-link">
+                                            忘记密码
+                                        </a>
+                                    </div>
+                            </div>
+                            </form>
+                        </div><!-- ends col-8 -->
+                        <div class="col-md-2">
+
+                        </div>
+                    </div>
+                </div>
+
             </div>
-            <input name="next" type="hidden" value="/">
-        </form>
-
-    </div>
-</div>
         </div>
+    </div>
 
     </div>
     <%- include("../main/footer")%>

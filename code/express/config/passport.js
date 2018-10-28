@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const userModel = mongoose.model('user');
-// const validator = require("express-validator");
+
 
 passport.use("local.login",new LocalStrategy({
 }, (username, password, done) => {
@@ -27,7 +27,7 @@ passport.use(
       passwordField: 'password',
       passReqToCallback: true //此处为true，下面函数的参数才能有req
     },
-    function(req, username, password, done) {
+    function (req, username, password, done) {
       // req.checkBody('email', '您输入的email无效').notEmpty().isEmail();
       req
         .checkBody("password", "您输入了无效密码")
@@ -36,12 +36,12 @@ passport.use(
       var errors = req.validationErrors();
       if (errors) {
         var messages = [];
-        errors.forEach(function(error) {
+        errors.forEach(function (error) {
           messages.push(error.msg);
         });
         return done(null, false, req.flash("error", messages));
       }
-        userModel.findOne({ username: username }, function(err, user) {
+      userModel.findOne({ username: username }, function (err, user) {
         if (err) {
           return done(err);
         }
@@ -52,7 +52,7 @@ passport.use(
         newUser.username = username;
         // newUser.password = newUser.encryptPassword(password);
         newUser.password = password;
-        newUser.save(function(err, result) {
+        newUser.save(function (err, result) {
           if (err) {
             return done(err);
           }
