@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<%- include("../../include") %>
+    <title>控制台</title>
+</head>
+
+<body>
+    <%- include("../header") %>
+<div class="container-fluid">
+    <ol class="breadcrumb">
+        <li><a href="/admin">管理首页</a></li>
+        <li><a href="/admin/content">内容首页</a></li>
+        <li class="active">内容添加</li>
+    </ol>
+    <form method="post">
+        <div class="form-group">
+            <label for="title">分类</label>
+            <select name="category" id="category" class="form-control">
+                <%for(let i = 0, len = categories.length; i < len; i++){%>
+                <option value="<%=categories[i]._id%>">
+                    <%=categories[i].name%>
+                </option>
+                <%}%>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="title">标题</label>
+            <input type="text" class="form-control" id="title" name="title" placeholder="请输入标题">
+        </div>
+        <div class="form-group">
+            <label for="description">简介</label>
+            <input type="text" class="form-control" id="description" name="description" placeholder="请输入简介">
+        </div>
+        <div class="form-group">
+            <label for="content">正文</label>
+            <textarea name="content" rows="9" class="form-control" placeholder="请输入正文"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">提交</button>
+    </form>
+</div>
+</body>
+
+</html>

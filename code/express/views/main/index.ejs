@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include("../include")%>
+    <title>Medo</title>
+
+</head>
+
+<body background="/public/imgs/material-grey-light-4k.jpg">
+        <div class="wrap">
+            <div class="main"> 
+                <%- include("nav")%>
+                <div class="container">
+                    <div class="page-header">
+                        <!-- Header -->
+                    </div>
+                    <div>
+                        <!-- Body&Content -->
+            <% for(let i = 0, len = docs.length; i < len; i++) { %>
+            <div class="well">
+                <h3>
+                    <%=docs[i].title%>
+                </h3>
+                <p>
+                    <%=docs[i].description%>
+                </p>
+                <a href="/views?contentId=<%=docs[i]._id%>" class="btn btn-info">阅读全文</a>
+                <span class="text-info pull-right">阅读量：
+                    <%=docs[i].views%> | 时间：
+                    <%=docs[i].addTime%> | 作者:
+                    <%=docs[i].author.username%> | 分类:
+                    <%=docs[i].category.name%></span>
+            </div>
+            <% } %>
+                        <%- include("../pagination") %>
+                    </div>
+                </div>
+            </div>
+        
+        </div>
+        <%- include("footer")%>
+</body>
+
+</html>
+
+

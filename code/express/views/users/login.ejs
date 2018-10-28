@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include("../include")%>
+    <title>Medo</title>
+
+</head>
+
+<body background="/public/imgs/material-grey-light-4k.jpg">
+    <div class="wrap">
+        <div class="main">
+            <%- include("../main/nav")%>
+<div class="container">
+    <div class="page-header">
+
+        <h2 class="text-center" style="color: lightblue">Log in to your account.</h2>
+
+    </div>
+    <div>
+        <!-- Body&Content -->
+
+        <form class="form" action="/users/login/" method="post">
+            <input name="csrfmiddlewaretoken" type="hidden" value="AeJf0R9v0otIEEaY7hn3LZWfd4oK9grSEIFi5miS3afYiMsggq9PnquH31NPDJ8q">
+            <div class="form-group"><label class="control-label" for="id_username">Username</label><input name="username"
+                    title="" class="form-control" id="id_username" autofocus="" required="" type="text" maxlength="254"
+                    placeholder="Username"></div>
+            <div class="form-group"><label class="control-label" for="id_password">Password</label><input name="password"
+                    title="" class="form-control" id="id_password" required="" type="password" placeholder="Password"></div>
+            <div class="form-group">
+                <button name="submit" class="btn btn-primary btn-block">Log in</button>
+            </div>
+            <input name="next" type="hidden" value="/">
+        </form>
+
+    </div>
+</div>
+        </div>
+
+    </div>
+    <%- include("../main/footer")%>
+</body>
+
+</html>

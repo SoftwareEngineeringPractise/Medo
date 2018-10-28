@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include("../../include") %>
+    <title>控制台</title>
+</head>
+
+<body>
+    <%- include("../header") %>
+    <div class="container-fluid">
+        <ol class="breadcrumb">
+            <li><a href="/admin">管理首页</a></li>
+            <li><a href="/admin/user">用户首页</a></li>
+            <li class="active">用户编辑</li>
+        </ol>
+        <form method="post">
+            <div class="form-group">
+                <label for="title">用户名</label>
+                <input type="text" class="form-control" id="username" name="username" placeholder="请输入用户名" value="<%=user.username%>">
+            </div>
+            <div class="form-group">
+                <label for="title">管理员</label>
+                <select name="isadmin" id="isadmin" class="form-control">
+                    <option value=true>是</option>
+                    <option value=false>否</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="description">密码</label>
+                <input type="text" class="form-control" id="password" name="password" placeholder="请输入密码" value="<%=user.password%>">
+            </div>
+            <button type="submit" class="btn btn-primary">提交</button>
+        </form>
+    </div>
+</body>
+<script>
+        let isadmin = JSON.parse("<%=user.isadmin %>");
+        if (isadmin) {
+            $("#isadmin").get(0).selectedIndex= 0;
+        } else {
+            $("#isadmin").get(0).selectedIndex = 1;
+        }
+</script>
+
+</html>

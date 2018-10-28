@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include("../include")%>
+    <title>Medo</title>
+</head>
+
+<body>
+<%- include("header") %>
+    <!-- 主体 -->
+    <div class="container">
+        <!-- 内容部分 -->
+        <div class="col-md-8">
+            <% for(let i = 0, len = docs.length; i < len; i++) { %>
+            <div class="well">
+                <h3>
+                    <%=docs[i].title%>
+                </h3>
+                <p>
+                    <%=docs[i].description%>
+                </p>
+                <a href="/views?contentId=<%=docs[i]._id%>" class="btn btn-info">阅读全文</a>
+                <span class="text-info pull-right">阅读量：
+                    <%=docs[i].views%> | 时间：
+                    <%=docs[i].addTime%> | 作者:
+                    <%=docs[i].author.username%> | 分类:
+                    <%=docs[i].category.name%></span>
+            </div>
+            <% } %>
+            <!-- 分页 -->
+            <%- include("../pagination") %>
+        </div>
+        <!-- 登录、注册、用户面板部分 -->
+        <div class="col-md-4">
+            <%if (!userInfo.userid) {%>
+            <!-- 登录面板 -->
+            <div id="login">
+                <h2>登录</h2>
+                <div class="input-group">
+                    <span class="input-group-addon">用户</span>
+                    <input type="text" class="form-control" name="username" placeholder="请输入用户名">
+                </div>
+                <br>
+                <div class="input-group">
+                    <span class="input-group-addon">密码</span>
+                    <input type="password" class="form-control" name="password" placeholder="请输入密码">
+                </div>
+                <br>
+                <button type="button" name="button" class="btn btn-primary form-control" id="login-btn">登录</button>
+                <br><br>
+                <a href="javascripts:;" class="col-md-offset-4">没有账号？点击注册</a>
+                <div class="alert alert-success alert-dismissable hide" role="alert">
+                    <button class="close" type="button">×</button>
+                    <span>操作成功！</span>
+                </div>
+            </div>
+            <!-- 注册面板 -->
+            <div id="reg" class="hide">
+                <h2>注册</h2>
+                <div class="input-group">
+                    <span class="input-group-addon">用户名称</span>
+                    <input type="text" class="form-control" name="username" placeholder="请输入用户名">
+                </div>
+                <br>
+                <div class="input-group">
+                    <span class="input-group-addon">输入密码</span>
+                    <input type="password" class="form-control" name="password" placeholder="请输入密码">
+                </div>
+                <br>
+                <div class="input-group">
+                    <span class="input-group-addon">确认密码</span>
+                    <input type="password" class="form-control" name="repassword" placeholder="请再次输入密码">
+                </div>
+                <br>
+                <button type="button" name="button" class="btn btn-primary form-control" id="reg-btn">注册</button>
+                <br><br>
+                <a href="javascripts:;" class="col-md-offset-4">已有账号？点击登录</a>
+                <!-- 警告框 -->
+                <div class="alert alert-success alert-dismissable hide" role="alert">
+                    <button class="close" type="button">×</button>
+                    <span>恭喜您操作成功！</span>
+                </div>
+            </div>
+            <%} else {%>
+            <!-- 用户面板 -->
+            <div id="user-info">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">用户面板</div>
+                    <div class="panel-body">
+                        <%if (userInfo.isadmin) {%>
+                        <h3>管理员
+                            <%=userInfo.username%>，您好!</h3>
+                        <p>
+                            <a href="/admin" class="btn btn-primary form-control">进入控制台</a>
+                        </p>
+                        <%} else {%>
+                        <h3>欢迎您，
+                            <%=userInfo.username%>！</h3>
+                        <%}%>
+                        <p>
+                            <button type="button" name="button" id="logout" class="btn btn-danger form-control">注销</button>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <%}%>
+        </div>
+    </div>
+    <script src="/public/js/main.js"></script>
+</body>
+</html>

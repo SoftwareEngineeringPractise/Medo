@@ -1,0 +1,17 @@
+<nav aria-label="...">
+    <ul class="pager">
+        <% if (page!=1) {%>
+        <li ><a href="<%=url%>?page=<%=page-1%>">上一页</a></li>
+        <% } %>
+        <li>
+            一共有
+            <%=count%> 条数据，每页显示
+            <%=limit%> 条数据，当前第
+            <%=page%>/
+            <%=pages%> 页
+        </li>
+        <% if (page!=pages) {%>
+        <li><a href="<%=url%>?page=<%=page+1%>">下一页</a></li>
+        <% } %>
+    </ul>
+</nav>

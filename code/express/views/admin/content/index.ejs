@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<%- include("../../include") %>
+    <title>控制台</title>
+</head>
+
+<body>
+    <%- include("../header") %>
+<div class="container-fluid">
+    <ol class="breadcrumb">
+        <li><a href="/admin">管理首页</a></li>
+        <li class="active">内容首页</li>
+    </ol>
+    <table class="table table-hover table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>分类名称</th>
+                <th>标题</th>
+                <th>作者</th>
+                <th>添加时间</th>
+                <th>阅读量</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <%for(let i = 0, len = docs.length; i < len; i++){%>
+            <tr>
+                <td>
+                    <%=docs[i]._id%>
+                </td>
+                <td>
+                    <%=docs[i].category.name%>
+                </td>
+                <td>
+                    <%=docs[i].title%>
+                </td>
+                <td>
+                    <%=docs[i].author.username%>
+                </td>
+                <td>
+                    <%=docs[i].addTime%>
+                </td>
+                <td>
+                    <%=docs[i].views%>
+                </td>
+                <td>
+                    <a href="/admin/content/edit?id=<%=docs[i]._id%>" class="btn btn-default">修改</a>
+                    <a href="/admin/content/delete?id=<%=docs[i]._id%>" class="btn btn-danger">删除</a>
+                </td>
+            </tr>
+            <%}%>
+        </tbody>
+    </table>
+</div>
+    <%- include("../../pagination") %>
+</body>
+
+</html>
