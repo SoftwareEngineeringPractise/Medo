@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include("../../include")%>
+    <title>用户控制</title>
+</head>
+
+<body>
+    <%- include("../header") %>
+    <div class="container-fluid">
+        <ol class="breadcrumb">
+            <li><a href="/admin">管理首页</a></li>
+            <li class="active">用户管理</li>
+            <li><a href="/admin/user/add">添加用户</a></li>
+        </ol>
+        <table class="table table-hover table-striped table-bordered">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">用户名</th>
+                    <th scope="col">密码</th>
+                    <th scope="col">是否是管理员</th>
+                    <th scope="col">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% for(var i=0; i<docs.length; i++) {%>
+                <tr>
+                    <td>
+                        <%= docs[i]._id%>
+                    </td>
+                    <td>
+                        <%= docs[i].username%>
+                    </td>
+                    <td>
+                        <%= docs[i].password%>
+                    </td>
+                    <td>
+                        <%= docs[i].isadmin%>
+                    </td>
+                    <td>
+                        <a href="/admin/user/edit?id=<%=docs[i]._id%>" class="btn btn-default">修改</a>
+                        <a href="/admin/user/delete?id=<%=docs[i]._id%>" class="btn btn-danger">删除</a>
+                    </td>
+                </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+    <%- include("../../pagination") %>
+</body>
+</html>

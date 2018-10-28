@@ -6,17 +6,26 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "axios": "^0.18.0",
+    "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.18.3",
     "cookie-parser": "~1.4.3",
     "cookies": "^0.7.2",
+    "crypto": "^1.0.1",
     "debug": "~2.6.9",
     "ejs": "^2.5.9",
     "express": "~4.16.0",
     "express-session": "^1.15.6",
+    "express-validator": "^5.3.0",
     "http-errors": "~1.6.2",
+    "jsonwebtoken": "^8.3.0",
     "marked": "^0.5.1",
     "moment": "^2.22.2",
     "mongoose": "^5.3.7",
-    "morgan": "~1.9.0"
+    "morgan": "~1.9.0",
+    "passport": "^0.4.0",
+    "passport-local": "^1.0.0",
+    "session-file-store": "^1.2.0",
+    "uuid": "^3.3.2"
   }
 }
