@@ -9,6 +9,7 @@
     "axios": "^0.18.0",
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.18.3",
+    "connect-flash": "^0.1.1",
     "cookie-parser": "~1.4.3",
     "cookies": "^0.7.2",
     "crypto": "^1.0.1",

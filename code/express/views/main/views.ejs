@@ -16,7 +16,6 @@
             <div class="container">
                 <div class="page-header">
                     <!-- Header -->
-
                 <div>
                     <!-- Body&Content -->
                     <div class="well-lg">
@@ -29,17 +28,17 @@
                                     <%=content.views%> | 时间：
                                     <%=content.addTime%> | 作者:
                                     <%=content.author.username%> | 分类:<a href="/?categoryId=<%=content.category._id%>">
-                                    <%=content.category.name%></a></span>
+                                        <%=content.category.name%></a></span>
                             </p>
                         </div>
-                    <div class="jumbotron">
-                        <div class="container">
-                            <p>
-                                <%- contentHtml %>
-                            </p>
+                        <div class="jumbotron">
+                            <div class="container">
+                                <p>
+                                    <%- contentHtml %>
+                                </p>
+                            </div>
+                            <!-- <div class="text-muted text-center">------------本文结束------------</div> -->
                         </div>
-                        <div class="text-muted text-center">------------本文结束------------</div>
-                    </div>
                         <div>
                             <!-- 评论 -->
                             <div class="well">
@@ -55,11 +54,11 @@
                                 <div class="alert alert-danger">请先登录！</div>
                                 <% } %>
                                 <div class="well well-lg">
+                                    <div class="col-sm-12"></div>
                                     <div class="commentList">
-                                        <div>
-                                            <span>作者 | 时间</span>
-                                            <p>评论内容</p>
-                                        </div>
+                                        <span>作者 | 时间</span>
+                                        <p>评论内容</p>
+                                    </div>
                                     </div>
                                 </div>
                     
