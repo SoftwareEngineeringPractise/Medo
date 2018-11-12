@@ -10,9 +10,9 @@ userSchema.methods.setPassword = function (password) {
 };
 
 userSchema.methods.validatePassword = function (password) {
-    // const hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex');
-    // return this.hash === hash;
-    return this.password === password;
+    const hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex');
+    return this.hash === hash;
+    // return this.password === password;
 };
 
 userSchema.methods.generateJWT = function () {

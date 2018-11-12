@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const userModel = mongoose.model('user');
+newUserSpaceModel = mongoose.model('userspace');
 
 
 passport.use("local.login",new LocalStrategy({
@@ -10,9 +11,7 @@ passport.use("local.login",new LocalStrategy({
         .findOne({ username })
       .then(user => {
         if (!user || !user.validatePassword(password)) {
-          return done(null, false, {
-            errors: { "email or password": "is invalid" }
-          });
+          return done(null, false,  "用户名或密码不正确");
         }
         return done(null, user);
       })
@@ -30,7 +29,7 @@ passport.use(
     function (req, username, password, done) {
       // req.checkBody('email', '您输入的email无效').notEmpty().isEmail();
       req
-        .checkBody("password", "您输入了无效密码")
+        .checkBody("password", "无效密码,密码至少为4位")
         .notEmpty()
         .isLength({ min: 4 });
       var errors = req.validationErrors();
@@ -39,24 +38,35 @@ passport.use(
         errors.forEach(function (error) {
           messages.push(error.msg);
         });
-        return done(null, false, req.flash("error", messages));
+        return done(null, false, messages);
       }
       userModel.findOne({ username: username }, function (err, user) {
         if (err) {
           return done(err);
         }
         if (user) {
-          return done(null, false, { message: "此用户名已经被注册" });
+          return done(null, false, "此用户名已经被注册" );
         }
         var newUser = new userModel();
+        var newUserSpace = new newUserSpaceModel();
         newUser.username = username;
-        // newUser.password = newUser.encryptPassword(password);
         newUser.password = password;
+        newUser.setPassword(password)
+        newUser.email = req.body.email;
+        newUser.phonenumber = req.body.phonenumber;
+        newUser.firstname = req.body.firstname;
+        newUser.lastname = req.body.lastname;
         newUser.save(function (err, result) {
           if (err) {
             return done(err);
           }
+         newUserSpace.user = result._id;
+         newUserSpace.save(function (err, result) {
+          if (err) {
+            return done(err);
+          }
           return done(null, newUser);
+          });
         });
       });
     }

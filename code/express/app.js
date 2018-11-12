@@ -34,7 +34,6 @@ app.use(cookieParser());
 app.use(
   session({
     genid: req => {
-      console.log(req.sessionID);
       return uuid();
     },
     secret: "haski",
@@ -94,7 +93,7 @@ app.post("/users/register", function(req, res, next) {
       return next(err);
     }
     if (!user) {
-      return res.send({ success: false, message: "用户注册失败" });
+      return res.send(info);
     }
     return res.redirect("/users/login");
   })(req, res, next);
@@ -104,7 +103,6 @@ app.post("/users/register", function(req, res, next) {
 
 function auth(req, res, next) {
   if (req.isAuthenticated()){
-    console.log("Happy");
     return next();
   }
   res.redirect('/');
