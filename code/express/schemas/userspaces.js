@@ -18,25 +18,50 @@ module.exports = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "user"
   },
-  gender : {
-      type: String,
-      enum:["male", "female", "undefined"],
-      default: "undefined"
+  gender: {
+    type: String,
+    enum: ["male", "female", "undefined"],
+    default: "undefined"
   },
+  // 格言
   motto: {
     type: String,
     default: "Life is tough"
   },
-  realname : {
-      type:String,
-      default: ""
+  // 真实名称
+  realname: {
+    type: String,
+    default: ""
   },
+  // 描述
   description: {
     type: String,
     default: ""
   },
-  likes: {
-    type: [userSchema],
+  // 学校
+  school: {
+    type: String,
     default: undefined
   },
+  // 院系
+  department: {
+    type: String,
+    default: undefined
+  },
+  // 研究所
+  institute: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "user",
+    default: undefined
+  },
+  // 加入收藏的人或实验室
+  likes: {
+    type: [mongoose.Schema.Types.ObjectId],
+    default: undefined
+  },
+  // 保存当前需要处理的信息
+  messages: {
+    type: [String],
+    default: undefined
+  }
 });

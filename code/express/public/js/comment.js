@@ -20,7 +20,7 @@ $(() => {
                     comment: $comment.val()
                 },
                 dataType: "json",
-                success: (result) => {
+                success: (result.data) => {
                     renderComment();
                     $comment.val("")
                 }
@@ -39,7 +39,7 @@ $(() => {
             success: (result) => {
                 // 创建html结构
                 let commentList = "";
-                for (let i = result.length - 1; i >= 0; i--) {
+                for (let i = result.data.length - 1; i >= 0; i--) {
                         commentList += `
 
 <div class="row">
@@ -54,10 +54,10 @@ $(() => {
   <div class="col-sm-11">
     <div class="panel panel-default">
       <div class="panel-heading">
-        <strong>${result[i].username} </strong>
-        <span class="text-muted">${result[i].postTime}</span>
+        <strong>${result.data[i].username} </strong>
+        <span class="text-muted">${result.data[i].postTime}</span>
       </div>
-            <div class="panel-body">${result[i].content}</div>
+            <div class="panel-body">${result.data[i].content}</div>
     </div>
   </div>
 </div>

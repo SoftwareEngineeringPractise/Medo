@@ -11,10 +11,10 @@ function updateinfo() {
         $("#register").removeClass("hide");
         $("#login").removeClass("hide");
       } else {
-        $("#name").html("欢迎, " + result.userinfo.username);
+        $("#name").html("欢迎, " + result.data.username);
         $("#logout").removeClass("hide");
         $("#name").removeClass("hide");
-        if (result.userinfo.isadmin) {
+        if (result.data.isadmin) {
           $("#console").removeClass("hide");
         }
       }

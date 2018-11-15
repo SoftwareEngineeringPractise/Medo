@@ -27,9 +27,13 @@ passport.use(
       passReqToCallback: true //此处为true，下面函数的参数才能有req
     },
     function (req, username, password, done) {
-      // req.checkBody('email', '您输入的email无效').notEmpty().isEmail();
+      req.
+        checkBody('email', '输入无效email,email格式为example@example.com').notEmpty().isEmail();
+      req.checkBody(
+        "phonenumber",
+        "输入无效手机号码,手机号码为11位").isMobilePhone("zh-CN");
       req
-        .checkBody("password", "无效密码,密码至少为4位")
+        .checkBody("password", "输入无效密码,密码至少为4位")
         .notEmpty()
         .isLength({ min: 4 });
       var errors = req.validationErrors();

@@ -119,7 +119,7 @@ router.get("/user/edit", (req, res, next) => {
             res.render("admin/error", {
                 userinfo: req.userinfo,
                 url: null,
-                message: "该分类不存在！"
+                message: "该用户不存在！"
             });
         }
     });

@@ -1,9 +1,7 @@
 const express = require("express");
-const categoryModel = require("../models/category");
 const contentModel = require("../models/content");
 const marked = require("marked");
 const pagination = require("../modules/pagination");
-
 const router = express.Router();
 
 
@@ -22,7 +20,7 @@ marked.setOptions({
 
 router.get("/", (req, res) => {
   pagination({
-    limit: 10,
+    limit: 2,
     model: contentModel,
     url: "/",
     ejs: "main/index",
