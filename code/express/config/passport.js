@@ -1,7 +1,11 @@
 const mongoose = require('mongoose');
-const passport = require('passport');
-const LocalStrategy = require('passport-local');
+const JwtStrategy = require('passport-jwt').Strategy;
+const ExtractJwt = require('passport-jwt').ExtractJwt;
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
 const userModel = mongoose.model('user');
+const config = require('./config');
+
 newUserSpaceModel = mongoose.model('userspace');
 
 
@@ -30,7 +34,7 @@ passport.use(
       req.
         checkBody('email', '输入无效email,email格式为example@example.com').notEmpty().isEmail();
       req.checkBody(
-        "phonenumber",
+        "tel",
         "输入无效手机号码,手机号码为11位").isMobilePhone("zh-CN");
       req
         .checkBody("password", "输入无效密码,密码至少为4位")
@@ -57,9 +61,7 @@ passport.use(
         newUser.password = password;
         newUser.setPassword(password)
         newUser.email = req.body.email;
-        newUser.phonenumber = req.body.phonenumber;
-        newUser.firstname = req.body.firstname;
-        newUser.lastname = req.body.lastname;
+        newUser.tel = req.body.tel;
         newUser.save(function (err, result) {
           if (err) {
             return done(err);
@@ -87,5 +89,24 @@ passport.deserializeUser((id, done) => {
         done(err, user);
     });
 });
+
+
+const opts = {}
+opts.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme("jwt");
+opts.secretOrKey = config.secret
+opts.passReqToCallback = true
+passport.use('jwt', new JwtStrategy(opts, function (req, jwtPayload, done) {
+  // todo:此处需要处理（例如使用jwt-simple）成jwt_payload.id来访问
+  userModel.findOne({ _id: jwtPayload._doc._id }, function (err, user) {
+    if (err) {
+      return done(err, false);
+    }
+    if (user) {
+      done(null, user);
+    } else {
+      done(null, false);
+    }
+  });
+}))
 
 module.exports = passport;

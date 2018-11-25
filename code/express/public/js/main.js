@@ -2,7 +2,7 @@
 function updateinfo() {
   $.ajax({
     type: "post",
-    url: "/api/userinfo",
+    url: "/api/web/userinfo",
     data: {
     },
     dataType: "json",

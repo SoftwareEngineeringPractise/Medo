@@ -7,7 +7,6 @@
 var app = require('../app');
 var debug = require('debug')('express:server');
 var http = require('http');
-var mongoose = require('mongoose');
 
 /**
  * Get port from environment and store in Express.
@@ -26,21 +25,10 @@ var server = http.createServer(app);
 /**
  * connect the db and start listen the port
  */
-mongoose.connect(
-  "mongodb://localhost:27017/medo_db", { useNewUrlParser: true },
-  err => {
-    if (!err) {
-      console.log("数据库连接成功！");
-      server.listen(port);
-      server.on("error", onError);
-      server.on("listening", onListening);
-    } else {
-      // 出错则抛出异常
-      console.log("数据库连接失败！");
-      throw err;
-    }
-  }
-);
+
+server.listen(port);
+server.on("error", onError);
+server.on("listening", onListening);
 
 
 /**

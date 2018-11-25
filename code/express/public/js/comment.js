@@ -14,13 +14,13 @@ $(() => {
             }
             $.ajax({
                 type: "post",
-                url: "/api/comment/post",
+                url: "/api/web/comment/post",
                 data: {
                     contentId: $("#contentId").val(),
                     comment: $comment.val()
                 },
                 dataType: "json",
-                success: (result.data) => {
+                success: (result) => {
                     renderComment();
                     $comment.val("")
                 }
@@ -31,7 +31,7 @@ $(() => {
     renderComment = () => {
         $.ajax({
             type: "get",
-            url: "/api/comment/",
+            url: "/api/web/comment/",
             data: {
                 contentId: $("#contentId").val(),
             },

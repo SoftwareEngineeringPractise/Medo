@@ -2,6 +2,7 @@ const express = require("express");
 const contentModel = require("../models/content");
 const marked = require("marked");
 const pagination = require("../modules/pagination");
+const passport = require("passport");
 const router = express.Router();
 
 
@@ -49,6 +50,48 @@ router.get("/test", (req, res)=>{
 router.get("/users/register", (req, res) => {
   res.render("users/register");
 });
+
+router.post("/users/login", function (req, res, next) {
+  passport.authenticate("local.login", function (err, user, info) {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      return res.send({ success: false, message: "authentication failed" });
+    }
+    req.login(user, loginErr => {
+      if (loginErr) {
+        return next(loginErr);
+      }
+      if (req.body.referer && (req.body.referer !== undefined && req.body.referer.slice(-6) !== "/login")) {
+        res.redirect(req.body.referer);
+      } else {
+        res.redirect("/");
+      }
+    });
+  })(req, res, next);
+});
+
+
+router.get("/users/logout", function(req, res) {
+  req.logout();
+  res.redirect("/");
+});
+
+router.post("/users/register", function(req, res, next) {
+  passport.authenticate("local.register", function(err, user, info) {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      return res.send(info);
+    }
+    return res.redirect("/users/login");
+  })(req, res, next);
+});
+
+
+
 
 
 router.get("/views", (req, res) => {

@@ -4,31 +4,45 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const bodyParser = require("body-parser");
-const indexRouter = require('./routes/index');
-const adminRouter = require('./routes/admin');
-const apiRouter = require('./routes/api');
-const userRounter = require('./routes/user');
 const session = require("express-session");
 const uuid = require("uuid/v4");
 const flash = require("connect-flash");
-const passport = require("./config/passport");
 const expressValidator = require("express-validator");
+const cors = require('cors');
+require("./models/db");
+const passport = require('./config/passport');
+const tools = require("./middlewares/tools");
+
+
+
+// Web 路由
+const indexRouter = require('./routes/index');
+const adminRouter = require("./routes/admin");
+const webapiRouter = require("./routes/api/web");
+const userRounter = require('./routes/user');
+
+// 微信API路由
+const wxapiRouter = require("./routes/api/wx");
+
 
 
 const app = express();
+app.use(cors());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+// app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 
 
 app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use(expressValidator());
 app.use(flash());
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+
 
 
 app.use(
@@ -48,57 +62,20 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use("/public",express.static(path.join(__dirname, 'public')));
+
+app.use("/public", express.static(path.join(__dirname, "public")));
 
 
 app.all("/user", auth);
 app.all("/admin", auth);
 
 app.use('/', indexRouter);
-app.use('/api', apiRouter);
 app.use("/user", userRounter)
 app.use('/admin', adminRouter);
 
-
-app.post("/users/login", function(req, res, next) {
-  passport.authenticate("local.login", function(err, user, info) {
-    if (err) {
-      return next(err);
-    }
-    if (!user) {
-      return res.send({ success: false, message: "authentication failed" });
-    }
-    req.login(user, loginErr => {
-      if (loginErr) {
-        return next(loginErr);
-      }
-      if (req.body.referer && (req.body.referer !== undefined && req.body.referer.slice(-6) !== "/login")) {
-        res.redirect(req.body.referer);
-      } else {
-        res.redirect("/");
-      }
-    });
-  })(req, res, next);
-});
-
-
-app.get("/users/logout", function(req, res) {
-  req.logout();
-  res.redirect('/');
-});
-
-app.post("/users/register", function(req, res, next) {
-  passport.authenticate("local.register", function(err, user, info) {
-    if (err) {
-      return next(err);
-    }
-    if (!user) {
-      return res.send(info);
-    }
-    return res.redirect("/users/login");
-  })(req, res, next);
-});
-
+app.use("/api/", tools);
+app.use("/api/web", webapiRouter);
+app.use("/api/wx", wxapiRouter);
 
 
 function auth(req, res, next) {
@@ -107,7 +84,6 @@ function auth(req, res, next) {
   }
   res.redirect('/');
 }
-
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
