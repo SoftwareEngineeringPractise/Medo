@@ -32,10 +32,14 @@ passport.use(
     },
     function (req, username, password, done) {
       req.
-        checkBody('email', '输入无效email,email格式为example@example.com').notEmpty().isEmail();
+        checkBody(
+          'email', '输入无效email,email格式为example@example.com')
+          .notEmpty()
+          .isEmail();
       req.checkBody(
         "tel",
-        "输入无效手机号码,手机号码为11位").isMobilePhone("zh-CN");
+        "输入无效手机号码,手机号码为11位")
+        .isMobilePhone("zh-CN");
       req
         .checkBody("password", "输入无效密码,密码至少为4位")
         .notEmpty()
@@ -48,7 +52,7 @@ passport.use(
         });
         return done(null, false, messages);
       }
-      userModel.findOne({ username: username }, function (err, user) {
+      userModel.findOne({ username: username }, function (err, user, info) {
         if (err) {
           return done(err);
         }
@@ -80,6 +84,120 @@ passport.use(
   )
 );
 
+const opts = {};
+opts.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme("jwt");
+opts.secretOrKey = config.secret;
+opts.passReqToCallback = true;
+
+passport.use(
+  "jwt",
+  new JwtStrategy(opts, function(req, jwtPayload, done) {
+    if(jwtPayload){
+      userModel.findOne({ _id: jwtPayload._id }, function (err, user) {
+        if (err) {
+          return done(err, false);
+        }
+        if (user) {
+          done(null, user);
+        } else {
+          done(null, false);
+        }
+      });
+    }
+    return done(null, false, "没有用户登录！");
+  })
+);
+
+passport.use(
+  "jwt.login",
+  new JwtStrategy(opts, function (req, jwtPayload, done) {
+    if(jwtPayload._id){
+      return done(null, false, "微信登录态失效！")
+    }
+    let username = req.body.username;
+    let password = req.body.password;
+    userModel.findOne({username:username}, function(err, user){
+      if(err){
+        return done(err, false);
+      }
+      if (!user || !user.validatePassword(password)) {
+        return done(null, false, "用户名或密码不正确");
+      }
+      userModel.findByIdAndDelete(jwtPayload._id, (err, result)=>{
+        if(err){
+          return done(null, false, "未知原因错误！");
+        }
+        user._id = jwtPayload._id;
+        user.weiXin = jwtPayload.weiXin;
+        user.save();
+      })
+      return done(null, user);
+    })
+  })
+);
+
+
+passport.use(
+  "jwt.register",
+  new JwtStrategy(opts, function (req, jwtPayload, done) {
+    if (!jwtPayload._id) {
+      return done(null, false, "微信登录态失效！")
+    }
+    let username = req.body.username;
+    let password = req.body.password;
+    req.
+      checkBody(
+        'email', '输入无效email,email格式为example@example.com')
+      .notEmpty()
+      .isEmail();
+    req.checkBody(
+      "tel",
+      "输入无效手机号码,手机号码为11位")
+      .isMobilePhone("zh-CN");
+    req
+      .checkBody("password", "输入无效密码,密码至少为4位")
+      .notEmpty()
+      .isLength({ min: 4 });
+    var errors = req.validationErrors();
+    if (errors) {
+      var messages = [];
+      errors.forEach(function (error) {
+        messages.push(error.msg);
+      });
+      return done(null, false, messages);
+    }
+    userModel.findOne({ username: username }, function (err, user, info) {
+      if (err) {
+        return done(err);
+      }
+      if (user) {
+        return done(null, false, "此用户名已经被注册");
+      }
+      var newUser = new userModel();
+      var newUserSpace = new newUserSpaceModel();
+      newUser.username = username;
+      newUser.password = password;
+      newUser.setPassword(password)
+      newUser.email = req.body.email;
+      newUser.tel = req.body.tel;
+      newUser.weiXin = jwtPayload.weiXin;
+      // newUser.userspace = newUserSpace;
+      newUser.save(function (err, result) {
+        if (err) {
+          return done(err);
+        }
+        newUserSpace.user = result._id;
+        newUserSpace.save(function (err, result) {
+          if (err) {
+            return done(err);
+          }
+          return done(null, newUser);
+        });
+      });
+    });
+  })
+);
+
 // tell passport how to serialize the user
 passport.serializeUser((user, done) => {
     done(null, user.id);
@@ -90,24 +208,5 @@ passport.deserializeUser((id, done) => {
         done(err, user);
     });
 });
-
-
-const opts = {}
-opts.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme("jwt");
-opts.secretOrKey = config.secret
-opts.passReqToCallback = true
-passport.use('jwt', new JwtStrategy(opts, function (req, jwtPayload, done) {
-  // todo:此处需要处理（例如使用jwt-simple）成jwt_payload.id来访问
-  userModel.findOne({ _id: jwtPayload._doc._id }, function (err, user) {
-    if (err) {
-      return done(err, false);
-    }
-    if (user) {
-      done(null, user);
-    } else {
-      done(null, false);
-    }
-  });
-}))
 
 module.exports = passport;

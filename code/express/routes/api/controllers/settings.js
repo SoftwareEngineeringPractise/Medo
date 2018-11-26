@@ -2,6 +2,8 @@ const request = require('request')
 const config = require('../../../config/config')
 const redis = require('../../../models/redis')
 
+
+// 微信登录token校验
 module.exports.wxAccessTokenCheck = function (callback) {
   const token_key = 'wx_access_token'
   redis.redisClient.get(token_key, function (err, reply) {
