@@ -79,19 +79,18 @@ router.get('/users/:id/info',(req, res, next)=>{
             password:0,
             salt:0,
             hash:0,
-        },
-        (err, docs) => {
-            if(err){
-                res.tools.setJson(404, 1, "信息获取失败！");
-            }
-            else if(!docs){
+        }).populate(['userspace']).then(
+        docs => {
+            if(!docs){
                 res.tools.setJson(404, 2, "没有该用户！");
             }
             else{
                 res.tools.setJson(200, 0, "返回用户信息"+userid, docs);
             }
 
-        } );
+        } ).catch(err=>{
+            res.tools.setJson(404, 1, err);
+        });
     }
 )
 
@@ -100,30 +99,167 @@ router.get('/users/:id/info',(req, res, next)=>{
  * 1. 导师实验室介绍
  */
 
+router.get('/labs/:id/info', (req, res, next) => {
+    userid = req.params.id // 用户名
+    if (userid === "me") { //登陆者信息
+        userid = req.user._id;
+    }
+    userModel.findOne(
+        {
+            _id: userid,
+        },
+        { // 去除保密字段
+            _id: 0,
+            password: 0,
+            salt: 0,
+            hash: 0,
+        }).populate(['userspace']).then(
+            docs => {
+                if(docs.role!="Lab"){
+                    res.tools.setJson(404, 2, "没有该研究所！");
+                }
+                else if (!docs) {
+                    res.tools.setJson(404, 2, "没有该用户！");
+                }
+                else {
+                    res.tools.setJson(200, 0, "返回研究所信息" + userid, docs);
+                }
 
+            }).catch(err => {
+                res.tools.setJson(404, 1, err);
+            });
+}
+)
 
  /**
-  * 2. 所有公告list， 时间降序排列 分页
+  * 2. 公告list，可选参数<authorid，categoryid> 时间降序排列 分页
   */
 
+router.get("/contents", function (req, res, next) {
+    let where = {};
+    let author = req.query.authorid;
+    let category = req.query.categoryid;
+    if (author) {
+        where.author = author;
+    }
+    if (category) {
+        where.category = category;
+    }
+    pagination({
+        limit: 10,
+        model: contentModel,
+        where: where,
+        res: res,
+        req: req,
+        populate: [
+            "category",
+            {
+                path: "author",
+                select: "username isadmin verified _id role",
+                options: { limit: 5 }
+            }
+        ],
+        params: {}
+    });
+});
 
 
   /**
    * 3. Get 对userid 的评价
    */
 
+router.get("/comment/:id", (req, res) => {
+    let userId = req.params.id || "";
+    userModel.findById(userId, (err, docs) => {
+      if (!err) {
+          res.tools.setJson(200, 0, "用户评论" + userId, docs.comment);
+        return;
+      } else {
+        res,tools.setJson(500, 1, err);
+        return;
+      }
+    });
+});
+
+
+
 
 /**
  *  4.1 POST userid 的评价
  */
 
+router.post("/comment/:id/post", (req, res) => {
+    if(!req.user){
+        res.tools.setJson(404, 1, "用户没有登录, 不能提交评论！");
+    }
+    let userId = req.params.id || "";
+    let comment = req.body.comment;
+    // 构建评论结构
+    let commentData = {
+        username: req.user.username,
+        postTime: new Date(),
+        content: comment
+    };
+    userModel.findById(userId, (err, user) => {
+      if (!err) {
+          user.comment.push(commentData);
+          user.save();
+          res.tools.setJson(200, 0, "评论提交成功");
+          return;
+      } else {
+          res, tools.setJson(404, 1, err);
+          return;
+      }
+    });
+});
 
 
 /**
  *  4.2 POST userid 的公告
  */
 
-
+// 内容添加的保存
+router.post("/content/post", (req, res, next) => {
+    if (!req.user) {
+        res.tools.setJson(404, 1, "用户没有登录, 不能提交评论！");
+    }
+  let title = req.body.title;
+  let category = req.body.category;
+  let description = req.body.description;
+  let content = req.body.content;
+  // 后端进行简单的验证
+  if (title === "") {
+    // 如果标题为空，渲染错误页面
+    res.tools.setJson(404, 1, "标题不能为空");
+    return;
+  } else if (description === "") {
+    // 如果简介为空，渲染错误页面
+      res.tools.setJson(404, 1, "简介不能为空");
+    return;
+  } else if (content === "") {
+      res.tools.setJson(404, 1, "正文不能为空");
+      return;
+  } else {
+    // 一切正常，存入数据库
+    contentModel.create(
+      {
+        title: title,
+        category: category,
+        author: req.user._id.toString(),
+        description: description,
+        content: content
+      },
+      err => {
+        if (!err) {
+          // 保存成功
+            res.tools.setJson(200, 1, "提交成功！");
+        } else {
+          throw err;
+        }
+      }
+    );
+  }
+});
 
  /**
   * 公告List userid的公告 降序排列 分页

@@ -62,6 +62,7 @@ passport.use(
         newUser.setPassword(password)
         newUser.email = req.body.email;
         newUser.tel = req.body.tel;
+        // newUser.userspace = newUserSpace;
         newUser.save(function (err, result) {
           if (err) {
             return done(err);

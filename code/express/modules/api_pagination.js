@@ -4,11 +4,6 @@ const pagination = object => {
     let pages = 0;
     let populate = object.populate || [];
     let params = object.params || {};
-    let responseData = {
-        code:0,
-        message:"分页结果" + page,
-        data:undefined
-    }
     object.model.countDocuments(object.where).then(count => {
         pages = Math.ceil(count / limit);
         page = Math.min(page, pages);
@@ -21,9 +16,11 @@ const pagination = object => {
             .skip(skip)
             .limit(limit)
             .then(docs => {
-                responseData.data = { docs: docs, page: page, pages: pages, 
-                    limit: limit, count: count, params: params };
-                object.res.json(responseData);
+                let data = {
+                    docs: docs, page: page, pages: pages,
+                    limit: limit, count: count, params: params
+                };
+                object.res.tools.setJson(200, 0, "分页结果，当前页数"+ page, data);
             });
     });
 };

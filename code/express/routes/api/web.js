@@ -60,7 +60,7 @@ router.get("/contents", function(req, res, next){
         where.category = category;
     }
     pagination({
-      limit: 2,
+      limit: 10,
       model: contentModel,
       where: where,
       res: res,
