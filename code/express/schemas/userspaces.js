@@ -1,67 +1,75 @@
 // 引入mongoose模块
 const mongoose = require("mongoose");
-// 引入用户
-var userSchema = require("./users.js");
 /*
     用户空间的数据结构
     {
-        用户名，引用对象
+        用户，引用对象
         性别，限定字符串
-        真实姓名：字符串
-        个性签名，字符串类型
         个人简介，字符串
-        关注的人，用户id列表
+        学校，字符串
+        院系，字符串
+        研究所，引用对象，
+        关注，引用对象，
+        收藏，引用对象，
+        消息，字符串数组
+
     }
 */
 module.exports = new mongoose.Schema({
+  // 用户
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "user"
   },
+
+  // 性别
   gender: {
     type: String,
     enum: ["male", "female", "undefined"],
     default: "undefined"
   },
-  // 格言
-  motto: {
-    type: String,
-    default: "Life is tough"
-  },
-  // 真实名称
-  realname: {
-    type: String,
-    default: ""
-  },
-  // 描述
+
+  // 个人描述
   description: {
     type: String,
     default: ""
   },
+
   // 学校
   school: {
     type: String,
-    default: undefined
+    default: ""
   },
+
   // 院系
   department: {
     type: String,
-    default: undefined
+    default: ""
   },
+
   // 研究所
   institute: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "user",
-    default: undefined
+    default: ""
   },
-  // 加入收藏的人或实验室
-  likes: {
+
+  // 加入关注的用户
+  follows: {
     type: [mongoose.Schema.Types.ObjectId],
-    default: undefined
+    ref: "follow",
+    default: null
   },
-  // 保存当前需要处理的信息
+  // 加入收藏的文章
+
+  favorites: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "favorite",
+    default: null
+  },
+  // 信息处理
   messages: {
     type: [String],
-    default: undefined
+    default: null
   }
 });
