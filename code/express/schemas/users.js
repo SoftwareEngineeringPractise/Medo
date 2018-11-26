@@ -13,7 +13,7 @@ const mongoose = require("mongoose");
         角色是否认证，布尔值，
         邮箱/手机号是否认证，布尔值，
         微信，引用对象，
-        用户认证信息，引用对象
+        用户评价，数组
 
     }
 */
@@ -47,5 +47,5 @@ module.exports = new mongoose.Schema({
   verified:{type:Boolean, default: false}, //是否经过身份认证
   status: { type: String, default: "0" }, // 0 - 未激活（不能使用tel／email + password进行登录；1 - 正常；2 - 禁用
   weiXin: { type:weiXinSchema, default: null},
-  userspace: { type: mongoose.Schema.Types.ObjectId, ref:'userspace', default:null}
+  comment:{ type: Array, default:[]} 
 });;

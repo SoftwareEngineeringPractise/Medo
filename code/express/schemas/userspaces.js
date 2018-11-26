@@ -51,7 +51,7 @@ module.exports = new mongoose.Schema({
   institute: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "user",
-    default: ""
+    default: null
   },
 
   // 加入关注的用户
@@ -69,7 +69,7 @@ module.exports = new mongoose.Schema({
   },
   // 信息处理
   messages: {
-    type: [String],
-    default: null
+    type: Array,
+    default: []
   }
 });
