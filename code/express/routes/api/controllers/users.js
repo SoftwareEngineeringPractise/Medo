@@ -47,7 +47,7 @@ module.exports.authWithWeiXinApp = function (req, res) {
             'weiXin.openId': data.openId
           }
         }
-        User.findOne(query, function (err, user) {
+        userModel.findOne(query, function (err, user) {
           if (err) {
             return res.tools.setJson(400, 1, err)
           }

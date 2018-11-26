@@ -35,7 +35,7 @@ const ctrlFiles = require("./controllers/files");
 
 
 /**
- * 用户 routing
+ * 用户认证
  */
 // 微信小程序用户登陆／注册
 router.post('/users/wei_xin/auth',
@@ -56,6 +56,125 @@ router.put('/users/me/email',
     passport.authenticate('jwt', { session: false }),
     ctrlUsers.userUpdateEmail
 )
+
+
+
+
+
+/**
+ * 0. Get 用户简要信息
+ */
+
+router.get('/users/:id/info',(req, res, next)=>{
+    userid = req.params.id // 用户名
+    if(userid === "me"){ //登陆者信息
+        userid = req.user._id;
+    }
+    userModel.findOne(
+        {
+            _id: userid,
+        },
+        { // 去除保密字段
+            _id:0,
+            password:0,
+            salt:0,
+            hash:0,
+        },
+        (err, docs) => {
+            if(err){
+                res.tools.setJson(404, 1, "信息获取失败！");
+            }
+            else if(!docs){
+                res.tools.setJson(404, 2, "没有该用户！");
+            }
+            else{
+                res.tools.setJson(200, 0, "返回用户信息"+userid, docs);
+            }
+
+        } );
+    }
+)
+
+
+/**
+ * 1. 导师实验室介绍
+ */
+
+
+
+ /**
+  * 2. 所有公告list， 时间降序排列 分页
+  */
+
+
+
+  /**
+   * 3. Get 对userid 的评价
+   */
+
+
+/**
+ *  4.1 POST userid 的评价
+ */
+
+
+
+/**
+ *  4.2 POST userid 的公告
+ */
+
+
+
+ /**
+  * 公告List userid的公告 降序排列 分页
+  */
+
+
+
+
+/**
+ * PUT 将contentid加到关注里
+ */
+
+
+
+/**
+ * 加入或取消userid到me关注中
+ */
+
+
+/**
+ * 加入或取消contentidid到me收藏中
+ */
+
+
+/**
+ *  我关注的人 List 分页
+*/
+
+
+/**
+ * 我收藏的文章 List 分页
+ */
+
+
+
+/**
+ * 关注人的动态 List 时间倒序 分页
+ */
+
+
+
+/**
+ * 模糊搜索 按username school List
+ */
+
+
+
+/**
+ * 用户信息修改
+ */
+
 
 /**
  * 活动 routing
