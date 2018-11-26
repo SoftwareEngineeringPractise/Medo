@@ -14,7 +14,7 @@ const moment = require("moment");
 
 module.exports = new mongoose.Schema({
     title: String,
-    follower: {
+    userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "user"
     },

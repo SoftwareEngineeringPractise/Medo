@@ -2,6 +2,8 @@ const express = require("express");
 const userModel = require("../../models/user");
 const contentModel = require("../../models/content");
 const userspaceModel = require("../../models/userspace");
+const favoriteModel = require("../../models/favorite");
+const followModel = require("../../models/follow");
 const pagination = require("../../modules/api_pagination");
 // const passport = require("../../config/passport");
 const router = express.Router();
@@ -261,51 +263,229 @@ router.post("/content/post", (req, res, next) => {
   }
 });
 
- /**
-  * 公告List userid的公告 降序排列 分页
-  */
-
-
-
-
-/**
- * PUT 将contentid加到关注里
- */
-
-
 
 /**
  * 加入或取消userid到me关注中
  */
+router.post("/follow/:id/add", (req, res, next) => {
+    if (!req.user) {
+        res.tools.setJson(404, 1, "用户未登录！");
+        return;
+    }
+    userId = req.params.id || "";
+    userModel.findById({ _id: userId }, (err, user) => {
+        if (!user) {
+            res.tools.setJson(404, 2, "没有该用户！");
+            return;
+        }
+        if (err) {
+            res.tools.setJson(500, 1, err);
+            return;
+        }
+        NewfollowModel = new followModel();
+        NewfollowModel.userId = req.user._id;
+        NewfollowModel.followId = userId;
+        NewfollowModel.addTime = new Date();
+        NewfollowModel.save(function (err, result) {
+            if (err) {
+                res.tools.setJson(404, 1, err);
+                return;
+            }
+            res.tools.setJson(200, 0, "用户关注成功！");
+            return;
+        });
 
+    })
+
+})
+
+router.post("/follow/:id/delete", (req, res, next) => {
+    if (!req.user) {
+        res.tools.setJson(404, 1, "用户未登录！");
+        return;
+    }
+    userId = req.params.id || "";
+    userModel.findById({ _id: userId }, (err, user) => {
+        if (!user) {
+            res.tools.setJson(404, 2, "没有该用户！");
+            return;
+        }
+        if (err) {
+            res.tools.setJson(500, 1, err);
+            return;
+        }
+        followModel.findOneAndDelete({ userId: req.user._id, followId: userId }, function (err, result) {
+            if (err) {
+                res.tools.setJson(404, 1, err)
+                return;
+            }
+            res.tools.setJson(200, 0, "用户取消关注成功！")
+            return;
+        });
+
+    })
+
+})
 
 /**
  * 加入或取消contentidid到me收藏中
  */
+router.post("/favorite/:id/add", (req, res,next)=>{
+    if(!req.user){
+        res.tools.setJson(404, 1, "用户未登录！");
+        return;
+    }
+    contentId = req.params.id || "";
+    contentModel.findById({_id: contentId}, (err, content)=>{
+        if(!content){
+            res.tools.setJson(404, 2, "没有该用户！");
+            return;
+        }
+        if(err){
+            res.tools.setJson(500, 1, err);
+            return;
+        }
+        NewfavoriteModel = new favoriteModel();
+        NewfavoriteModel.userId = req.user._id;
+        NewfavoriteModel.contentId = contentId;
+        NewfavoriteModel.addTime = new Date();
+        NewfavoriteModel.save(function(err, result) {
+          if (err) {
+            res.tools.setJson(404, 1, err);
+            return;
+          }
+          res.tools.setJson(200, 0, "文章收藏成功！");
+          return;
+        });
+
+    })
+
+})
+
+router.post("/favorite/:id/delete", (req, res, next) => {
+    if (!req.user) {
+        res.tools.setJson(404, 1, "用户未登录！");
+        return;
+    }
+    contentId = req.params.id || "";
+    contentModel.findById({ _id: contentId }, (err, content) => {
+        if (!content) {
+            res.tools.setJson(404, 2, "没有该用户！");
+            return;
+        }
+        if (err) {
+            res.tools.setJson(500, 1, err);
+            return;
+        }
+        favoriteModel.findOneAndDelete({userId: req.user._id, contentId : contentId}, function (err, result) {
+            if (err) {
+                res.tools.setJson(404, 1, err)
+                return;
+            }
+            res.tools.setJson(200, 0, "文章取消收藏成功！")
+            return;
+        });
+
+    })
+
+})
 
 
 /**
  *  我关注的人 List 分页
 */
-
+router.get("/:id/follows", (req, res, next) => {
+    let userId = req.params.id || "";
+    if (userid === "me") {
+        favoriteModel.find({ userId: req.user._id }).populate(['userId', 'followId']).then(
+            docs=>{
+                if (!docs) {
+                    res.tools.setJson(404, 1, "没有记录！");
+                    return;
+                }
+                res.tools.setJson(200, 0, "关注用户返回成功！", docs);
+            }
+        ).catch(err => {
+                res.tools.setJson(500, 2, err);
+                return;
+        })
+    }
+})
 
 /**
  * 我收藏的文章 List 分页
  */
 
 
+router.get("/:id/favorites", (req, res, next) => {
+    let userId = req.params.id || "";
+    if (userid === "me") {
+        favoriteModel.find({userId: req.user._id}).populate(['userId','contentId']).then(docs=>{
+            if(!docs){
+                res.tools.setJson(404, 1, "没有记录！");
+                return;
+            }
+            res.tools.setJson(200, 0, "收藏内容返回成功！", docs);
+        }).catch(err=>{
+            if (err) {
+                res.tools.setJson(500, 2, err);
+                return;
+            }
+        });
+    }
+}
+)
 
 /**
  * 关注人的动态 List 时间倒序 分页
  */
 
-
+router.get("/:id/updatings", (req, res, next) => {
+    let userId = req.params.id || "";
+    if(!req.user){
+        res.tools.setJson(404, 1, "用户未登录！");
+    }
+    if (userId === "me") {
+        followModel.find({ userId: req.user._id }).populate(['userId', 'followId'])
+        .sort({_id:-1})
+        .then(docs => {
+            if (!docs) {
+                res.tools.setJson(404, 1, "没有记录！");
+                return;
+            }
+            let count = docs.length;
+            let data = [];
+            docs.forEach(item=>{
+                contentModel.find({author: item.followId}, (err, content)=>{
+                    content.forEach(item1 => {
+                      data.push(item1);
+                    });
+                    count = count - 1;
+                    if (count == 0) {
+                        res.tools.setJson(200, 0, "关注动态返回成功！", data);
+                    }
+                }
+                )
+            })
+        })
+        .catch(err => {
+            if (err) {
+                res.tools.setJson(500, 2, err);
+                return;
+            }
+        });
+    }
+}
+)
 
 /**
  * 模糊搜索 按username school List
  */
 
-
+router.get('/search/:q', (req, res, next)=>{
+    let query = req.params.q || "";
+    // userModel.find({''})
+})
 
 /**
  * 用户信息修改

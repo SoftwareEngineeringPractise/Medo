@@ -57,4 +57,6 @@ require('./content')
 require('./user')
 require('./userspace')
 require("./file");
+require("./follow")
+require("./favorite")
 
