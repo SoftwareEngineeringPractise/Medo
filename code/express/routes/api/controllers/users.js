@@ -1,10 +1,11 @@
-const request = require('request')
-const jwt = require('jsonwebtoken')
-const config = require('../../../config/config')
-const redis = require("../../../models/redis")
-const WxBizDataCrypt = require('../../../utils/wxBizDataCrypt')
-const mongoose = require('mongoose')
+const request = require('request');
+const jwt = require('jsonwebtoken');
+const config = require('../../../config/config');
+const redis = require("../../../models/redis");
+const WxBizDataCrypt = require('../../../utils/wxBizDataCrypt');
+const mongoose = require('mongoose');
 const userModel = mongoose.model("user");
+const userspaceModel = mongoose.model("userspace");
 
 /**
  * 用户通过微信小程序进行注册／登陆
@@ -157,8 +158,43 @@ module.exports.userUpdateEmail = function (req, res) {
 module.exports.userUpdatePassword = function(req, res) {
   if (req.user) {
     userModel.findById(req.user._id).exec(function(err, user) {
-      user.email = req.body.email;
+      user.password = req.body.password;
+      user.setPassword(req.body.password);
       user.save(function(err, user) {
+        if (err) {
+          return res.tools.setJson(400, 1, err);
+        } else {
+          return res.tools.setJson(200, 0, "success", { user: user });
+        }
+      });
+    });
+  } else {
+    return res.tools.setJson(404, 1, "no user");
+  }
+};
+
+module.exports.userUpdateSchool = function (req, res) {
+  if (req.user) {
+    userspaceModel.findOne({user:req.user._id}).exec(function(err, user) {
+      user.school = req.body.school;
+      user.save(function(err, user) {
+        if (err) {
+          return res.tools.setJson(400, 1, err);
+        } else {
+          return res.tools.setJson(200, 0, "success", { user: user });
+        }
+      });
+    });
+  } else {
+    return res.tools.setJson(404, 1, "no user");
+  }
+};
+
+module.exports.userUpdateDepartment = function (req, res) {
+  if (req.user) {
+    userspaceModel.findOne({ user: req.user._id }).exec(function (err, user) {
+      user.department = req.body.department;
+      user.save(function (err, user) {
         if (err) {
           return res.tools.setJson(400, 1, err);
         } else {

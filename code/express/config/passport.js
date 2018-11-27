@@ -92,39 +92,46 @@ opts.passReqToCallback = true;
 passport.use(
   "jwt",
   new JwtStrategy(opts, function(req, jwtPayload, done) {
-    if(jwtPayload){
-      userModel.findOne({ _id: jwtPayload._id }, function (err, user) {
-        if (err) {
-          return done(err, false);
-        }
-        if (user) {
-          done(null, user);
-        } else {
-          done(null, false);
-        }
-      });
-    }
-    return done(null, false, "没有用户登录！");
+    let token = req.header("Authorization");
+    redis.redisClient.get(token, function(err, reply) {
+      if (err) {
+        return done(err, false, "Redis服务器访问失败！");
+      }
+      if (reply === null) {
+        return done(err, false, "用户未登录或登录Session过期！请重新认证！");
+      }
+      if (jwtPayload) {
+        userModel.findOne({ _id: jwtPayload._id }, function(err, user) {
+          if (err) {
+            return done(err, false);
+          }
+          if (user) {
+            done(null, user);
+          } else {
+            done(null, false);
+          }
+        });
+      }
+      return done(null, false, "没有用户登录！");
+    });
   })
 );
 
 passport.use(
   "jwt.login",
   new JwtStrategy(opts, function (req, jwtPayload, done) {
-    if(jwtPayload._id){
-      return done(null, false, "微信登录态失效！")
-    }
+    // let token = req.header("Authorization");
     let username = req.body.username;
     let password = req.body.password;
-    userModel.findOne({username:username}, function(err, user){
-      if(err){
+    userModel.findOne({ username: username }, function (err, user) {
+      if (err) {
         return done(err, false);
       }
       if (!user || !user.validatePassword(password)) {
         return done(null, false, "用户名或密码不正确");
       }
-      userModel.findByIdAndDelete(jwtPayload._id, (err, result)=>{
-        if(err){
+      userModel.findByIdAndDelete(jwtPayload._id, (err, result) => {
+        if (err) {
           return done(null, false, "未知原因错误！");
         }
         user._id = jwtPayload._id;

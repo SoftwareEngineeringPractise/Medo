@@ -7,15 +7,15 @@ const followModel = require("../../models/follow");
 const pagination = require("../../modules/api_pagination");
 // const passport = require("../../config/passport");
 const router = express.Router();
-
 const passport = require("passport");
-const path = require("path");
-const fse = require("fs-extra");
-const utils = require("../../utils/utils");
-const multer = require("multer");
-const moment = require("moment");
-
 const ctrlUsers = require("./controllers/users");
+// const path = require("path");
+// const fse = require("fs-extra");
+// const utils = require("../../utils/utils");
+// const multer = require("multer");
+// const moment = require("moment");
+
+
 
 
 
@@ -25,39 +25,62 @@ const ctrlUsers = require("./controllers/users");
 /**
  * 0. 小程序认证和信息修改
  */
-// 微信小程序用户登陆／注册
+// 微信小程序认证 请求参数:code, 返回: token; 
+//TODO  每次认证前端将token更新缓存到本地,并且针对每个login required的请求的header添加一个字段 
+// 字段的键为Authorization，值为缓存的token
 router.post('/users/wei_xin/auth',
     ctrlUsers.authWithWeiXinApp
 )
 
-app.use("/", passport.authenticate("jwt", { session: false }));
 
-
-// 修改用户名
+// 修改用户名 请求参数:name , 返回: 调试信息; 
+// TODO 此请求header需要加入Authorization，值为缓存的token
 router.put('/users/me/name',
     passport.authenticate('jwt', { session: false }),
     ctrlUsers.userUpdateName
 )
-// 修改手机号
+// 修改手机号 请求参数:tel , 返回: 调试信息; 
+// TODO 此请求header需要加入Authorization，值为缓存的token
 router.put('/users/me/tel',
     passport.authenticate('jwt', { session: false }),
     ctrlUsers.userUpdateTel
 )
-// 修改邮箱
+// 修改邮箱 请求参数:email , 返回: 调试信息; 
+// TODO 此请求header需要加入Authorization，值为缓存的token
 router.put('/users/me/email',
     passport.authenticate('jwt', { session: false }),
     ctrlUsers.userUpdateEmail
 )
 
-// 修改密码
+// 修改密码 请求参数:password , 返回: 调试信息;
+// TODO 此请求header需要加入Authorization，值为缓存的token
 router.put(
   "/users/me/password",
   passport.authenticate("jwt", { session: false }),
-//   ctrlUsers.userUpdatePassword
+  ctrlUsers.userUpdatePassword
+);
+
+
+// 修改学校
+// TODO 此请求header需要加入Authorization，值为缓存的token
+router.put(
+  "/users/me/school",
+  passport.authenticate("jwt", { session: false }),
+  ctrlUsers.userUpdateSchool
+);
+
+
+// 修改院系
+// TODO 此请求header需要加入Authorization，值为缓存的token
+router.put(
+  "/users/me/department",
+  passport.authenticate("jwt", { session: false }),
+  ctrlUsers.userUpdateDepartment
 );
 
 
 // 用户登录接口
+// TODO 此请求header需要加入Authorization，值为缓存的token
 router.post(
   "/users/login",
   function(req, res, next) { 
@@ -75,6 +98,7 @@ router.post(
 
 
 // 用户登出接口
+// TODO 此请求header需要加入Authorization，值为缓存的token
 router.get(
   "/users/logout",
   passport.authenticate("jwt", { session: false }),
@@ -90,6 +114,7 @@ router.get(
 
 
 // 用户注册接口
+// TODO 此请求header需要加入Authorization，值为缓存的token
 router.post("/users/register", function(req, res, next) {
   passport.authenticate("jwt.register", function(err, user, info) {
     if (err) {
@@ -109,7 +134,7 @@ router.post("/users/register", function(req, res, next) {
 /**
  * 1. 获取用户简要信息
  */
-
+// TODO 当此请求id为me时，header需要加入Authorization，值为缓存的token
 router.get(
   "/users/:id/info",
   passport.authenticate("jwt", { session: false }),
@@ -150,7 +175,8 @@ router.get(
 /**
  * 2. 导师实验室介绍
  */
-
+// 参数 id 为me即当前用户，或者其它用户的id
+ // TODO 当此请求id为me时，header需要加入Authorization，值为缓存的token
 router.get(
   "/labs/:id/info",
   passport.authenticate("jwt", { session: false }),
@@ -190,12 +216,12 @@ router.get(
 );
 
  /**
-  * 3. 公告list，可选参数<authorid，categoryid> 时间降序排列 分页
+  * 3. 公告list，参数: 参数为空 或者可选参数authorid或可选参数categoryid> 对于分别返回所有、指定author、指定category的文章
+  * 时间降序排列 分页
   */
 
 router.get(
   "/contents",
-  passport.authenticate("jwt", { session: false }),
   function(req, res, next) {
     let where = {};
     let author = req.query.authorid;
@@ -229,7 +255,7 @@ router.get(
   /**
    * 4. 获取对id的评价
    */
-
+// 评论获取  参数 需要获取评论的用户id
 router.get(
   "/comment/:id",
   passport.authenticate("jwt", { session: false }),
@@ -254,59 +280,8 @@ router.get(
  *  5.1 POST userid 的评价
  */
 
-
-// 评论获取
-router.get(
-  "/comment",
-  passport.authenticate("jwt", { session: false }),
-  (req, res) => {
-    let contentId = req.query.contentId || "";
-    contentModel.findById(contentId, (err, content) => {
-      if (!err) {
-        responseData.code = 0;
-        responseData.message = "内容id为" + contentId + "的用户评论";
-        responseData.data = content.comment;
-        res.json(responseData);
-        return;
-      } else {
-        throw err;
-        return;
-      }
-    });
-  }
-);
-
-
-
-router.post(
-  "/comment/post",
-  passport.authenticate("jwt", { session: false }),
-  (req, res) => {
-    let contentId = req.body.contentId;
-    let comment = req.body.comment;
-    // 构建评论结构
-    let commentData = {
-      username: req.user.username,
-      postTime: new Date(),
-      content: comment
-    };
-
-    contentModel.findById(contentId, (err, content) => {
-      if (!err) {
-        content.comment.push(commentData);
-        content.save();
-        responseData.code = 0;
-        responseData.message = "评论提交成功";
-        res.json(responseData);
-        return;
-      } else {
-        throw err;
-        return;
-      }
-    });
-  }
-);
-
+// 评论提交 参数 需要评论的用户id
+// TODO 此请求id的header需要加入Authorization，值为缓存的token
 router.post(
   "/comment/:id/post",
   passport.authenticate("jwt", { session: false }),
@@ -341,13 +316,14 @@ router.post(
  *  5.2 POST userid 的公告
  */
 
-// 内容添加的保存
+// 内容添加的保存 内容的title category description content
+// TODO 此请求id的header需要加入Authorization，值为缓存的token
 router.post(
   "/content/post",
   passport.authenticate("jwt", { session: false }),
   (req, res, next) => {
     if (!req.user) {
-      res.tools.setJson(404, 1, "用户没有登录, 不能提交评论！");
+      res.tools.setJson(404, 1, "用户没有登录, 不能提交文章！");
     }
     let title = req.body.title;
     let category = req.body.category;
@@ -392,6 +368,9 @@ router.post(
 /**
  * 6 加入或取消userid到me关注中
  */
+ 
+// 加入关注 参数 加入关注的人的id
+ // TODO 此请求id的header需要加入Authorization，值为缓存的token
 router.post(
   "/follow/:id/add",
   passport.authenticate("jwt", { session: false }),
@@ -426,6 +405,8 @@ router.post(
   }
 );
 
+// 取消关注 参数取消关注的用户id
+// TODO 此请求id的header需要加入Authorization，值为缓存的token
 router.post("/follow/:id/delete", passport.authenticate("jwt", { session: false }),(req, res, next) => {
     if (!req.user) {
         res.tools.setJson(404, 1, "用户未登录！");
@@ -457,6 +438,9 @@ router.post("/follow/:id/delete", passport.authenticate("jwt", { session: false 
 /**
  * 7. 加入或取消contentidid到me收藏中
  */
+
+ // 加入收藏 参数 收藏的文章id
+ // TODO 此请求id的header需要加入Authorization，值为缓存的token
 router.post(
   "/favorite/:id/add",
   passport.authenticate("jwt", { session: false }),
@@ -491,6 +475,9 @@ router.post(
   }
 );
 
+
+ // 取消收藏 参数 收藏的文章id
+ // TODO 此请求id的header需要加入Authorization，值为缓存的token
 router.post(
   "/favorite/:id/delete",
   passport.authenticate("jwt", { session: false }),
@@ -528,27 +515,26 @@ router.post(
 /**
  *  8. 我关注的人 List 分页
 */
+// 我关注的人 参数 无
+// TODO 此请求id的header需要加入Authorization，值为缓存的token
 router.get(
   "/:id/follows",
   passport.authenticate("jwt", { session: false }),
   (req, res, next) => {
-    let userId = req.params.id || "";
-    if (userid === "me") {
-      favoriteModel
-        .find({ userId: req.user._id })
-        .populate(["userId", "followId"])
-        .then(docs => {
-          if (!docs) {
-            res.tools.setJson(404, 1, "没有记录！");
-            return;
-          }
-          res.tools.setJson(200, 0, "关注用户返回成功！", docs);
-        })
-        .catch(err => {
-          res.tools.setJson(500, 2, err);
+    favoriteModel
+      .find({ userId: req.user._id })
+      .populate(["userId", "followId"])
+      .then(docs => {
+        if (!docs) {
+          res.tools.setJson(404, 1, "没有记录！");
           return;
-        });
-    }
+        }
+        res.tools.setJson(200, 0, "关注用户返回成功！", docs);
+      })
+      .catch(err => {
+        res.tools.setJson(500, 2, err);
+        return;
+      });
   }
 );
 
@@ -556,76 +542,72 @@ router.get(
  * 9. 我收藏的文章 List 分页
  */
 
-
+// 我收藏的文章 参数 无
+// TODO 此请求id的header需要加入Authorization，值为缓存的token
 router.get(
-  "/:id/favorites",
+  "/me/favorites",
   passport.authenticate("jwt", { session: false }),
   (req, res, next) => {
-    let userId = req.params.id || "";
-    if (userid === "me") {
-      favoriteModel
-        .find({ userId: req.user._id })
-        .populate(["userId", "contentId"])
-        .then(docs => {
-          if (!docs) {
-            res.tools.setJson(404, 1, "没有记录！");
-            return;
-          }
-          res.tools.setJson(200, 0, "收藏内容返回成功！", docs);
-        })
-        .catch(err => {
-          if (err) {
-            res.tools.setJson(500, 2, err);
-            return;
-          }
-        });
-    }
+    favoriteModel
+      .find({ userId: req.user._id })
+      .populate(["userId", "contentId"])
+      .then(docs => {
+        if (!docs) {
+          res.tools.setJson(404, 1, "没有记录！");
+          return;
+        }
+        res.tools.setJson(200, 0, "收藏内容返回成功！", docs);
+      })
+      .catch(err => {
+        if (err) {
+          res.tools.setJson(500, 2, err);
+          return;
+        }
+      });
   }
 );
 
 /**
  * 10. 关注人的动态 List 时间倒序 分页
  */
-
+// 我关注的人的动态 参数 无
+// TODO 此请求id的header需要加入Authorization，值为缓存的token
 router.get(
-  "/:id/updatings",
+  "/me/updatings",
   passport.authenticate("jwt", { session: false }),
   (req, res, next) => {
-    let userId = req.params.id || "";
     if (!req.user) {
       res.tools.setJson(404, 1, "用户未登录！");
     }
-    if (userId === "me") {
-      followModel
-        .find({ userId: req.user._id })
-        .populate(["userId", "followId"])
-        .sort({ _id: -1 })
-        .then(docs => {
-          if (!docs) {
-            res.tools.setJson(404, 1, "没有记录！");
-            return;
-          }
-          let count = docs.length;
-          let data = [];
-          docs.forEach(item => {
-            contentModel.find({ author: item.followId }, (err, content) => {
-              content.forEach(item1 => {
-                data.push(item1);
-              });
-              count = count - 1;
-              if (count == 0) {
-                res.tools.setJson(200, 0, "关注动态返回成功！", data);
-              }
+    followModel
+      .find({ userId: req.user._id })
+      .populate(["userId", "followId"])
+      .sort({ _id: -1 })
+      .then(docs => {
+        if (!docs) {
+          res.tools.setJson(404, 1, "没有记录！");
+          return;
+        }
+        let count = docs.length;
+        let data = [];
+        docs.forEach(item => {
+          contentModel.find({ author: item.followId }, (err, content) => {
+            content.forEach(item1 => {
+              data.push(item1);
             });
+            count = count - 1;
+            if (count == 0) {
+              res.tools.setJson(200, 0, "关注动态返回成功！", data);
+            }
           });
-        })
-        .catch(err => {
-          if (err) {
-            res.tools.setJson(500, 2, err);
-            return;
-          }
         });
-    }
+      })
+      .catch(err => {
+        if (err) {
+          res.tools.setJson(500, 2, err);
+          return;
+        }
+      });
   }
 );
 
@@ -633,12 +615,53 @@ router.get(
  * 11. 模糊搜索 按username school List
  */
 
-router.get('/search/:q', (req, res, next)=>{
-    let query = req.params.q || "";
-    // userModel.find({''})
+ // 按用户名搜索 参数 q 返回 用户名包含字符串q的所有userspace
+router.get('/search/username/:q', (req, res, next)=>{ 
+  let query = req.params.q || "";
+  userModel.find({ username: { $regex: query, $options: "i" } }, function(
+    err,
+    docs
+  ) {
+    if (err) {
+      res.tools.setJson(404, 1, err);
+    }
+    if (docs) {
+      res.tools.setJson(200, 0, docs);
+    }
+  });
 })
 
+// 按学校搜索 参数 q 返回 学校包含字符串q的所有userspace
+router.get('/search/school/:q', (req, res, next) => {
+  let query = req.params.q || "";
+  userspaceModel.find({ school: { $regex: query, $options: "i" } }, function (
+    err,
+    docs
+  ) {
+    if (err) {
+      res.tools.setJson(404, 1, err);
+    }
+    if (docs) {
+      res.tools.setJson(200, 0, docs);
+    }
+  });
+})
 
+// 按院系搜索 参数 q  返回 院系包含字符串q的所有userspace
+router.get('/search/department/:q', (req, res, next) => {
+  let query = req.params.q || "";
+  userspaceModel.find(
+    { department: { $regex: query, $options: "i" } },
+    function(err, docs) {
+      if (err) {
+        res.tools.setJson(404, 1, err);
+      }
+      if (docs) {
+        res.tools.setJson(200, 0, docs);
+      }
+    }
+  );
+})
 
 
 
