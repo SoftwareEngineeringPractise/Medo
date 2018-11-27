@@ -61,7 +61,7 @@ router.put(
 );
 
 
-// 修改学校
+// 修改学校 参数 school 返回: 调试信息;
 // TODO 此请求header需要加入Authorization，值为缓存的token
 router.put(
   "/users/me/school",
@@ -70,7 +70,7 @@ router.put(
 );
 
 
-// 修改院系
+// 修改院系 参数 department 返回: 调试信息;
 // TODO 此请求header需要加入Authorization，值为缓存的token
 router.put(
   "/users/me/department",
@@ -79,7 +79,7 @@ router.put(
 );
 
 
-// 用户登录接口
+// 用户登录接口 参数：username password 返回: 调试信息;
 // TODO 此请求header需要加入Authorization，值为缓存的token
 router.post(
   "/users/login",
@@ -97,14 +97,14 @@ router.post(
 );
 
 
-// 用户登出接口
+// 用户登出接口 参数：无 返回: 调试信息;
 // TODO 此请求header需要加入Authorization，值为缓存的token
 router.get(
   "/users/logout",
   passport.authenticate("jwt", { session: false }),
   function(req, res, next) {
     if (req.user) {
-      req.logout();
+      redis.redisClient.expires(req.header("Authorization"), 0);
       res.tools.setJson(200, 0, "退出成功");
     } else {
       res.tools.setJson(200, 1, "用户没有登录");
@@ -113,7 +113,7 @@ router.get(
 );
 
 
-// 用户注册接口
+// 用户注册接口 参数 username password tel email 返回: 调试信息;
 // TODO 此请求header需要加入Authorization，值为缓存的token
 router.post("/users/register", function(req, res, next) {
   passport.authenticate("jwt.register", function(err, user, info) {
@@ -134,6 +134,7 @@ router.post("/users/register", function(req, res, next) {
 /**
  * 1. 获取用户简要信息
  */
+// 参数：为me即当前用户，或者其它用户的id 返回: 调试信息;
 // TODO 当此请求id为me时，header需要加入Authorization，值为缓存的token
 router.get(
   "/users/:id/info",
@@ -175,7 +176,7 @@ router.get(
 /**
  * 2. 导师实验室介绍
  */
-// 参数 id 为me即当前用户，或者其它用户的id
+// 参数 id 为me即当前用户，或者其它用户的id 返回: 调试信息;
  // TODO 当此请求id为me时，header需要加入Authorization，值为缓存的token
 router.get(
   "/labs/:id/info",
