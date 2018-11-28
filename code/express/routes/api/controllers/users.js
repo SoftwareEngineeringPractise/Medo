@@ -47,7 +47,7 @@ module.exports.authWithWeiXinApp = function (req, res) {
             const token = jwt.sign(user.toJSON(), config.secret, {
               expiresIn: 60 * 60 * 48 // expires in 48 hours
             })
-            redis.redisClient.set({openId:sessionKey }); // 保存信息
+            redis.redisClient.set(openId,sessionKey); // 保存信息
             redis.redisClient.expire(token, 60 * 60 * 1.5);
             return res.tools.setJson(200, 0, 'success', {
               token: 'JWT ' + token,
