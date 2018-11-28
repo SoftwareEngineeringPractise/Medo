@@ -18,7 +18,7 @@ const userspaceModel = mongoose.model("userspace");
 module.exports.authWithWeiXinApp = function (req, res) {
   const appId = config.wxAppId
   const appSecret = config.wxAppSecret
-  const code = req.body.code
+  const code = req.query.code
   let sessionKey = ''
   let openId = ''
   let requestOptions, path
@@ -44,10 +44,10 @@ module.exports.authWithWeiXinApp = function (req, res) {
           if (!user) {
             res.tools.setJson(400, 1, "该微信没有注册用户！")
           } else {
-            const token = jwt.sign(user, config.secret, {
+            const token = jwt.sign(user.toJSON(), config.secret, {
               expiresIn: 60 * 60 * 48 // expires in 48 hours
             })
-            redis.redisClient.set(token, { openId: openId, sessionKey: sessionKey }); // 保存信息
+            redis.redisClient.set({openId:sessionKey }); // 保存信息
             redis.redisClient.expire(token, 60 * 60 * 1.5);
             return res.tools.setJson(200, 0, 'success', {
               token: 'JWT ' + token,
@@ -67,7 +67,7 @@ module.exports.authWithWeiXinApp = function (req, res) {
 module.exports.authWithWeiXinApp2= function (req, res) {
   const appId = config.wxAppId
   const appSecret = config.wxAppSecret
-  const code = req.body.code
+  const code = req.query.code
   let sessionKey = ''
   let requestOptions, path
   path = `https://api.weixin.qq.com/sns/jscode2session?appid=${appId}&secret=${appSecret}&js_code=${code}&grant_type=authorization_code`
@@ -139,28 +139,40 @@ module.exports.authWithWeiXinApp2= function (req, res) {
 
 module.exports.userUpdateName = function (req, res) {
   if (req.user) {
-    userModel.findById(req.user._id)
-      .exec(function (err, user) {
-        user.name = req.body.name
-        user.save(function (err, user) {
-          if (err) {
-            return res.tools.setJson(400, 1, err)
-          } else {
-            return res.tools.setJson(200, 0, 'sucess', {
-              user: user
+    let name = req.query.name;
+    userModel.findOne({username:name}, (err, user)=>{
+      if(err){
+        res.tools.setJson(400, 1, err)
+      }
+      if(user){
+        res.tools.setJson(400, 2, "该用户名已经被占用！")
+      }
+      else{
+        userModel.findById(req.user._id,
+          (err, user) => {
+            user.name = req.query.name
+            user.save(function (err, user) {
+              if (err) {
+                return res.tools.setJson(400, 1, err)
+              } else {
+                return res.tools.setJson(200, 0, 'sucess', {
+                  user: user
+                })
+              }
             })
-          }
-        })
-      })
+          })
+      }
+    })
   } else {
-    return res.tools.setJson(404, 1, "no user")
+    return res.tools.setJson(404, 1, "用户没有登录！")
   }
 }
 
 module.exports.userUpdateTel = function (req, res) {
   if (req.user) {
-    userModel.findById(req.user._id).exec(function (err, user) {
-      user.tel = req.body.tel;
+    userModel.findById(req.user._id, (err, user)=>{
+      console.log(req)
+      user.tel = req.query.tel;
       user.save(function (err, user) {
         if (err) {
           return res.tools.setJson(400, 1, err);
@@ -176,8 +188,8 @@ module.exports.userUpdateTel = function (req, res) {
 
 module.exports.userUpdateEmail = function (req, res) {
   if (req.user) {
-    userModel.findById(req.user._id).exec(function (err, user) {
-      user.email = req.body.email;
+    userModel.findById(req.user._id,(err, user)=> {
+      user.email = req.query.email;
       user.save(function (err, user) {
         if (err) {
           return res.tools.setJson(400, 1, err);
@@ -193,9 +205,9 @@ module.exports.userUpdateEmail = function (req, res) {
 
 module.exports.userUpdatePassword = function(req, res) {
   if (req.user) {
-    userModel.findById(req.user._id).exec(function(err, user) {
-      user.password = req.body.password;
-      user.setPassword(req.body.password);
+    userModel.findById(req.user._id,(err, user) =>{
+      user.password = req.query.password;
+      user.setPassword(req.query.password);
       user.save(function(err, user) {
         if (err) {
           return res.tools.setJson(400, 1, err);
@@ -211,8 +223,8 @@ module.exports.userUpdatePassword = function(req, res) {
 
 module.exports.userUpdateSchool = function (req, res) {
   if (req.user) {
-    userspaceModel.findOne({user:req.user._id}).exec(function(err, user) {
-      user.school = req.body.school;
+    userspaceModel.findOne({user:req.user._id},(err, user)=> {
+      user.school = req.query.school;
       user.save(function(err, user) {
         if (err) {
           return res.tools.setJson(400, 1, err);
@@ -228,8 +240,8 @@ module.exports.userUpdateSchool = function (req, res) {
 
 module.exports.userUpdateDepartment = function (req, res) {
   if (req.user) {
-    userspaceModel.findOne({ user: req.user._id }).exec(function (err, user) {
-      user.department = req.body.department;
+    userspaceModel.findOne({ user: req.user._id },(err, user)=> {
+      user.department = req.query.department;
       user.save(function (err, user) {
         if (err) {
           return res.tools.setJson(400, 1, err);

@@ -1,6 +1,7 @@
 const express = require("express");
 const userModel = require("../../models/user");
 const contentModel = require("../../models/content");
+const categoryModel = require("../../models/category");
 const userspaceModel = require("../../models/userspace");
 const pagination = require("../../modules/api_pagination");
 const passport = require("../../config/passport");
