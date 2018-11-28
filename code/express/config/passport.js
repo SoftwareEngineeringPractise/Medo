@@ -104,7 +104,9 @@ passport.use(
       if (reply === null) {
         return done(err, false);
       }
+      console.log(jwtPayload._id);
       if (jwtPayload) {
+        console.log(jwtPayload._id);
         userModel.findOne({ _id: jwtPayload._id }, function(err, user) {
           if (err) {
             return done(err, false);
