@@ -13,12 +13,61 @@ const userspaceModel = mongoose.model("userspace");
  * @param req
  * @param res
  */
+
+
 module.exports.authWithWeiXinApp = function (req, res) {
   const appId = config.wxAppId
   const appSecret = config.wxAppSecret
-  const encryptedData = req.body.encryptedData
   const code = req.body.code
-  const iv = req.body.iv
+  let sessionKey = ''
+  let openId = ''
+  let requestOptions, path
+  path = `https://api.weixin.qq.com/sns/jscode2session?appid=${appId}&secret=${appSecret}&js_code=${code}&grant_type=authorization_code`
+  requestOptions = {
+    url: path,
+    method: 'GET',
+    json: {}
+  }
+  request(
+    requestOptions,
+    function (err, response, body) {
+      if (err) {
+        return res.tools.setJson(400, 1, err)
+      }
+      if (body.errcode === undefined) {
+        sessionKey = body.session_key;
+        openId = body.openId;
+        userModel.findOne({"weiXin.openId":openId}, function (err, user) {
+          if (err) {
+            return res.tools.setJson(400, 1, err)
+          }
+          if (!user) {
+            res.tools.setJson(400, 1, "该微信没有注册用户！")
+          } else {
+            const token = jwt.sign(user, config.secret, {
+              expiresIn: 60 * 60 * 48 // expires in 48 hours
+            })
+            redis.redisClient.set(token, { openId: openId, sessionKey: sessionKey }); // 保存信息
+            redis.redisClient.expire(token, 60 * 60 * 1.5);
+            return res.tools.setJson(200, 0, 'success', {
+              token: 'JWT ' + token,
+              user: user
+            })
+          }
+        })
+      } else {
+        return res.tools.setJson(400, 1, body.errmsg)
+      }
+    }
+  )
+}
+
+
+
+module.exports.authWithWeiXinApp2= function (req, res) {
+  const appId = config.wxAppId
+  const appSecret = config.wxAppSecret
+  const code = req.body.code
   let sessionKey = ''
   let requestOptions, path
   path = `https://api.weixin.qq.com/sns/jscode2session?appid=${appId}&secret=${appSecret}&js_code=${code}&grant_type=authorization_code`
@@ -34,20 +83,7 @@ module.exports.authWithWeiXinApp = function (req, res) {
         return res.tools.setJson(400, 1, err)
       }
       if (body.errcode === undefined) {
-        sessionKey = body.session_key
-        const pc = new WxBizDataCrypt(appId, sessionKey)
-        const data = pc.decryptData(encryptedData, iv)
-        let query = {}
-        if (data.unionId) {
-          query = {
-            'weiXin.unionId': data.unionId
-          }
-        } else if (data.openId) {
-          query = {
-            'weiXin.appId': config.wxAppId,
-            'weiXin.openId': data.openId
-          }
-        }
+        sessionKey = body.session_key;
         userModel.findOne(query, function (err, user) {
           if (err) {
             return res.tools.setJson(400, 1, err)

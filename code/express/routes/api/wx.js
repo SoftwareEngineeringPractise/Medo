@@ -25,7 +25,7 @@ const ctrlUsers = require("./controllers/users");
 /**
  * 0. 小程序认证和信息修改
  */
-// 微信小程序认证 请求参数:code, 返回: token; 
+// 微信小程序认证 请求参数:code,username 返回: token; 
 //TODO  每次认证前端将token更新缓存到本地,并且针对每个login required的请求的header添加一个字段 
 // 字段的键为Authorization，值为缓存的token
 router.post('/users/wei_xin/auth',
@@ -39,6 +39,7 @@ router.put('/users/me/name',
     passport.authenticate('jwt', { session: false }),
     ctrlUsers.userUpdateName
 )
+
 // 修改手机号 请求参数:tel , 返回: 调试信息; 
 // TODO 此请求header需要加入Authorization，值为缓存的token
 router.put('/users/me/tel',
@@ -61,7 +62,7 @@ router.put(
 );
 
 
-// 修改学校
+// 修改学校 参数 school 返回: 调试信息;
 // TODO 此请求header需要加入Authorization，值为缓存的token
 router.put(
   "/users/me/school",
@@ -70,7 +71,7 @@ router.put(
 );
 
 
-// 修改院系
+// 修改院系 参数 department 返回: 调试信息;
 // TODO 此请求header需要加入Authorization，值为缓存的token
 router.put(
   "/users/me/department",
@@ -79,32 +80,32 @@ router.put(
 );
 
 
-// 用户登录接口
+// 用户登录接口 参数：username password 返回: 调试信息;
 // TODO 此请求header需要加入Authorization，值为缓存的token
 router.post(
   "/users/login",
   function(req, res, next) { 
-      passport.authenticate("jwt.login", function(err, user, info) {
+      passport.authenticate("local.wxlogin", function(err, user, info) {
       if (err) {
         return next(err);
       }
       if (!user) {
         return res.tools.setJson(400, 1, info);
       }
-      return res.tools.setJson(200, 0, "登录成功");
+      return res.tools.setJson(200, 0, "登录成功", {token:info});
     })(req, res, next);
   }
 );
 
 
-// 用户登出接口
+// 用户登出接口 参数：无 返回: 调试信息;
 // TODO 此请求header需要加入Authorization，值为缓存的token
 router.get(
   "/users/logout",
   passport.authenticate("jwt", { session: false }),
   function(req, res, next) {
     if (req.user) {
-      req.logout();
+      redis.redisClient.expires(req.header("Authorization"), 0);
       res.tools.setJson(200, 0, "退出成功");
     } else {
       res.tools.setJson(200, 1, "用户没有登录");
@@ -113,7 +114,7 @@ router.get(
 );
 
 
-// 用户注册接口
+// 用户注册接口 参数 username password tel email 返回: 调试信息;
 // TODO 此请求header需要加入Authorization，值为缓存的token
 router.post("/users/register", function(req, res, next) {
   passport.authenticate("jwt.register", function(err, user, info) {
@@ -134,6 +135,7 @@ router.post("/users/register", function(req, res, next) {
 /**
  * 1. 获取用户简要信息
  */
+// 参数：为me即当前用户，或者其它用户的id 返回: 调试信息;
 // TODO 当此请求id为me时，header需要加入Authorization，值为缓存的token
 router.get(
   "/users/:id/info",
@@ -175,7 +177,7 @@ router.get(
 /**
  * 2. 导师实验室介绍
  */
-// 参数 id 为me即当前用户，或者其它用户的id
+// 参数 id 为me即当前用户，或者其它用户的id 返回: 调试信息;
  // TODO 当此请求id为me时，header需要加入Authorization，值为缓存的token
 router.get(
   "/labs/:id/info",
@@ -618,7 +620,13 @@ router.get(
  // 按用户名搜索 参数 q 返回 用户名包含字符串q的所有userspace
 router.get('/search/username/:q', (req, res, next)=>{ 
   let query = req.params.q || "";
-  userModel.find({ username: { $regex: query, $options: "i" } }, function(
+  userModel.find({ username: { $regex: query, $options: "i" } }, {
+    // 去除保密字段
+    _id: 0,
+    password: 0,
+    salt: 0,
+    hash: 0
+  }, function(
     err,
     docs
   ) {
