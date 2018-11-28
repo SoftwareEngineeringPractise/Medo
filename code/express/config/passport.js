@@ -41,7 +41,7 @@ passport.use(
           .isEmail();
       req.checkBody(
         "tel",
-        "输入无效手机号码,手机号码为11位")
+        "输入无效手机号码,手机号码为中国大陆手机号码！")
         .isMobilePhone("zh-CN");
       req
         .checkBody("password", "输入无效密码,密码至少为4位")
@@ -95,13 +95,14 @@ opts.passReqToCallback = true;
 passport.use(
   "jwt",
   new JwtStrategy(opts, function(req, jwtPayload, done) {
-    let token = req.header("Authorization");
-    redis.redisClient.get(token, function(err, reply) {
+    
+    redis.redisClient.get(jwtPayload.weiXin.openId, function(err, reply) {
       if (err) {
-        return done(err, false, "Redis服务器访问失败！");
+        
+        return done(err, false);
       }
       if (reply === null) {
-        return done(err, false, "用户未登录或登录Session过期！请重新认证！");
+        return done(err, false);
       }
       if (jwtPayload) {
         userModel.findOne({ _id: jwtPayload._id }, function(err, user) {
@@ -114,8 +115,10 @@ passport.use(
             done(null, false);
           }
         });
+      } else{
+        return done(null, false);
       }
-      return done(null, false, "没有用户登录！");
+
     });
   })
 );
@@ -153,18 +156,18 @@ passport.use("local.wxlogin", new LocalStrategy(
             return done(null,false, err)
           }
           if (body.errcode === undefined) {
+            console.log(body)
             sessionKey = body.session_key;
-            openId = body.openId;
-
+            openId = body.openid;
+            user.weiXin = { openId: openId};
+            user.save();
+            console.log(user.toJSON())
             const token = jwt.sign(user.toJSON(), config.secret, {
               expiresIn: 60 * 60 * 48 // expires in 48 hours
             });
-            redis.redisClient.set(token, {
-              openId: openId,
-              sessionKey: sessionKey
-            }); // 保存信息
+            redis.redisClient.set(openId, sessionKey); 
             redis.redisClient.expire(token, 60 * 60 * 1.5);
-            return done(null, user, token);
+            return done(null, user, "JWT " + token);
           } else {
             return done(null, false, body.errmsg);
           }
