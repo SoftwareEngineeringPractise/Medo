@@ -23,7 +23,7 @@
             </div>
             <div class="panel-footer">
                 <%if(url){%>
-                <a href="<%=url%>">跳转</a>
+                <font id="num"></font><a href="<%=url%>">直接跳转</a>
                 <%}else{%>
                 <a href="javascript:window.history.back();">返回上一步</a>
                 <%}%>
@@ -31,5 +31,16 @@
         </div>
     </div>
 </body>
-
+<script type="text/javascript">
+    function recount(num) {
+        if (num > 0) {
+            num--;
+            setTimeout(function () { recount(num); }, 1000);
+            $('#num').html(num + 's后自动跳转内容页面...');
+        } else {
+            console.log("end");
+        }
+    }
+    recount(4);
+</script>
 </html>

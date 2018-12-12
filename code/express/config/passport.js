@@ -7,9 +7,10 @@ const ExtractJwt = require('passport-jwt').ExtractJwt;
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const userModel = mongoose.model('user');
+const emailModel = mongoose.model('emailvalidation');
 const config = require('./config');
 
-newUserSpaceModel = mongoose.model('userspace');
+const userinfoModel = mongoose.model('userinfo');
 
 
 passport.use("local.login",new LocalStrategy({
@@ -44,6 +45,10 @@ passport.use(
         "输入无效手机号码,手机号码为中国大陆手机号码！")
         .isMobilePhone("zh-CN");
       req
+        .checkBody("username", "输入无效用户名,用户名至少为6位")
+        .notEmpty()
+        .isLength({ min: 2 });        
+      req
         .checkBody("password", "输入无效密码,密码至少为4位")
         .notEmpty()
         .isLength({ min: 4 });
@@ -62,24 +67,33 @@ passport.use(
         if (user) {
           return done(null, false, "此用户名已经被注册" );
         }
-        var newUser = new userModel();
-        var newUserSpace = new newUserSpaceModel();
+        const newUser = new userModel();
+        const newUserInfo = new userinfoModel();
+        const newemailModel = new emailModel();
         newUser.username = username;
         newUser.password = password;
         newUser.setPassword(password)
         newUser.email = req.body.email;
         newUser.tel = req.body.tel;
-        // newUser.userspace = newUserSpace;
-        newUser.save(function (err, result) {
+        newUserInfo.save(function(err, userinforesult) {
           if (err) {
             return done(err);
           }
-         newUserSpace.user = result._id;
-         newUserSpace.save(function (err, result) {
-          if (err) {
-            return done(err);
-          }
-          return done(null, newUser);
+          newUser.userInfo = userinforesult._id;
+          newUser.save(function(err, result) {
+            if (err) {
+              return done(err);
+            }
+            newUserInfo.userId = result._id;
+            newemailModel.userId = result._id;
+            newUserInfo.save();
+            newemailModel.save(function(err, emailresult) {
+              if (err) {
+                return done(err);
+              }
+              emailresult.sendEmail(result.username, result.email);
+              return done(null, newUser);
+            });
           });
         });
       });
@@ -104,9 +118,7 @@ passport.use(
       if (reply === null) {
         return done(err, false);
       }
-      console.log(jwtPayload._id);
       if (jwtPayload) {
-        console.log(jwtPayload._id);
         userModel.findOne({ _id: jwtPayload._id }, function(err, user) {
           if (err) {
             return done(err, false);
@@ -139,6 +151,9 @@ passport.use("local.wxlogin", new LocalStrategy(
       if (!user || !user.validatePassword(password)) {
         return done(null, false, "用户名或密码不正确");
       }
+      if(user.status != 1){
+        return done(null, false, "该账户邮件未认证或该账户被禁用！")
+      }
       const appId = config.wxAppId
       const appSecret = config.wxAppSecret
       const code = req.body.code
@@ -158,7 +173,6 @@ passport.use("local.wxlogin", new LocalStrategy(
             return done(null,false, err)
           }
           if (body.errcode === undefined) {
-            console.log(body)
             sessionKey = body.session_key;
             openId = body.openid;
             user.weiXin = { openId: openId};

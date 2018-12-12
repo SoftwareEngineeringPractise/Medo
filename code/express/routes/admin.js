@@ -10,7 +10,7 @@ router.use((req, res, next) => {
         console.log("Why");
         res.redirect("/");
     } else {
-        if (req.user.isadmin) {
+        if (req.user.verified) {
             next();
         } else {
             res.send("<h2>您没有该页面的访问权限！</h2>");
@@ -23,6 +23,234 @@ router.get("/", (req, res, next) => {
     res.render("admin/index", {
         userinfo: req.userinfo
     });
+});
+
+
+
+router.get("/content", (req, res, next) => {
+    let where = {};
+    if(!req.user.isadmin){
+        where = {author:req.user._id};
+    }
+    pagination({
+        limit: 10,
+        // 需要操作的数据库模型
+        model: contentModel,
+        // 需要控制分页的url
+        url: "/admin/content",
+        // 渲染的模板页面
+        ejs: "admin/content",
+        // 查询的条件
+        where: where,
+        // 需要跨集合查询的条件
+        populate: ["category", "author"],
+        res: res,
+        req: req
+    });
+});
+
+// 博客内容的添加界面
+router.get("/content/add", (req, res, next) => {
+    // 从数据中读取分类信息
+    categoryModel.find({}, (err, categories) => {
+        if (!err) {
+            res.render("admin/content/add", {
+                userinfo: req.userinfo,
+                categories: categories
+            });
+            return;
+        } else {
+            throw err;
+            return;
+        }
+    });
+});
+
+// 内容添加的保存
+router.post("/content/add", (req, res, next) => {
+    let title = req.body.title;
+    let category = req.body.category;
+    let description = req.body.description;
+    let content = req.body.content;
+    // 后端进行简单的验证
+    if (title === "") {
+        // 如果标题为空，渲染错误页面
+        res.render("admin/error", {
+            url: null,
+            userinfo: req.userinfo,
+            message: "标题不能为空"
+        });
+        return;
+    } else if (description === "") {
+        // 如果简介为空，渲染错误页面
+        res.render("admin/error", {
+            url: null,
+            userinfo: req.userinfo,
+            message: "简介不能为空"
+        });
+        return;
+    } else if (content === "") {
+        // 如果正文为空，渲染错误页面
+        res.render("admin/error", {
+            url: null,
+            userinfo: req.userinfo,
+            message: "正文不能为空"
+        });
+        return;
+    } else {
+        // 一切正常，存入数据库
+        contentModel.create({
+            title: title,
+            category: category,
+            author: req.user._id.toString(),
+            description: description,
+            content: content
+        }, (err) => {
+            if (!err) {
+                // 保存成功
+                res.set("refresh", "3;url=/admin/content");
+                res.render("admin/success", {
+                    url: "/admin/content",
+                    userinfo: req.userinfo,
+                    message: "提交成功！"
+                });
+            } else {
+                throw err;
+            }
+        });
+    }
+});
+
+
+// 内容修改的界面
+router.get("/content/edit", (req, res, next) => {
+    // 获取需要修改内容的id
+    let id = req.query.id;
+    // 从数据库中查询
+    contentModel.findById(id, (err, content) => {
+        if (content) {
+            // 如果数据存在，从数据库中查询出所有分类
+            categoryModel.find({}, (err, categories) => {
+                if (!err) {
+                    // 渲染修改模板视图
+                    res.render("admin/content/edit", {
+                        userinfo: req.userinfo,
+                        categories: categories,
+                        content: content
+                    });
+                } else {
+                    throw err;
+                }
+            });
+        } else {
+            // 如果该内容不存在
+            res.render("admin/error", {
+                url: null,
+                userinfo: req.userinfo,
+                message: "该内容不存在！"
+            });
+        }
+    });
+});
+
+// 内容的修改保存
+router.post("/content/edit", (req, res, next) => {
+    // 获取数据
+    let title = req.body.title;
+    let category = req.body.category;
+    let description = req.body.description;
+    let content = req.body.content;
+    let id = req.query.id;
+
+    // 后端进行简单的验证
+    if (title === "") {
+        // 如果标题为空，渲染错误页面
+        res.render("admin/error", {
+            url: null,
+            userinfo: req.user,
+            message: "标题不能为空!"
+        });
+        return;
+    } else if (description === "") {
+        // 如果简介为空，渲染错误页面
+        res.render("admin/error", {
+            url: null,
+            userinfo: req.user,
+            message: "简介不能为空!"
+        });
+        return;
+    } else if (content === "") {
+        // 如果正文为空，渲染错误页面
+        res.render("admin/error", {
+            url: null,
+            userinfo: req.user,
+            message: "正文不能为空!"
+        });
+        return;
+    } else {
+        // 一切正常，更新数据库
+        contentModel.update({
+            _id: id
+        }, {
+                title: title,
+                category: category,
+                description: description,
+                content: content
+            }, (err) => {
+                if (!err) {
+                    // 保存成功
+                    res.set("refresh", "3;url=/admin/content");
+                    res.render("admin/success", {
+                        url: "/admin/content",
+                        userinfo: req.user,
+                        message: "修改成功！"
+                    });
+                } else {
+                    throw err;
+                }
+            });
+    }
+});
+
+
+// 内容的删除
+router.get("/content/delete", (req, res, next) => {
+    // 获取id
+    let id = req.query.id;
+    // 根据id删除数据
+    contentModel.remove({
+        _id: id
+    }, (err) => {
+        if (!err) {
+            // 删除成功
+            res.set("refresh", "3;url=/admin/content");
+            res.render("admin/success", {
+                url: "/admin/content",
+                userinfo: req.userinfo,
+                message: "删除成功！"
+            });
+        } else {
+            // 出错
+            // res.set("refresh", "3;url=/admin/content");
+            res.render("admin/error", {
+                url: "/admin/content",
+                userinfo: req.userinfo,
+                message: "删除失败！"
+            });
+        }
+    });
+});
+
+
+
+// 以下内容只能管理员用户才有访问权限
+
+router.use((req, res, next) => {
+    if (req.user.isadmin) {
+      next();
+    } else {
+      res.send("<h2>您没有该页面的访问权限！</h2>");
+    }
 });
 
 
@@ -89,6 +317,7 @@ router.post("/user/add", (req, res, next) => {
             userModel.create({ username: username, password: password, isadmin: isadmin }, err => {
                 if (!err) {
                     // 渲染一个错误提示
+                    res.set("refresh", "3;url=/admin/user");
                     res.render("admin/success", {
                         userinfo: req.userinfo,
                         message: "添加成功！",
@@ -271,6 +500,7 @@ router.get("/user/delete", (req, res, next) => {
     }, (err) => {
         if (!err) {
             // 删除成功
+            res.set("refresh", "3;url=/admin/user");
             res.render("admin/success", {
                 url: "/admin/user",
                 userinfo: req.userinfo,
@@ -339,6 +569,7 @@ router.post("/category/add", (req, res, next) => {
             }, (err) => {
                 if (!err) {
                     // 渲染一个错误提示
+                    res.set("refresh", "3;url=/admin/category");
                     res.render("admin/success", {
                         userinfo: req.userinfo,
                         message: "添加成功！",
@@ -414,6 +645,7 @@ router.post("/category/edit", (req, res, next) => {
                     categoryModel.update({ _id: id }, { $set: { name: name } }, (err) => {
                         if (!err) {
                             // 不出错
+                            res.set("refresh", "3;url=/admin/category");
                             res.render("admin/success", {
                                 userinfo: req.userinfo,
                                 url: "/admin/category",
@@ -452,6 +684,7 @@ router.get("/category/delete", (req, res, next) => {
     categoryModel.remove({ _id: id }, (err) => {
         if (!err) {
             // 删除成功
+            res.set("refresh", "3;url=/admin/category");
             res.render("admin/success", {
                 url: "/admin/category",
                 userinfo: req.userinfo,
@@ -468,212 +701,6 @@ router.get("/category/delete", (req, res, next) => {
     });
 });
 
-
-router.get("/content", (req, res, next) => {
-    pagination({
-        limit: 10,
-        // 需要操作的数据库模型
-        model: contentModel,
-        // 需要控制分页的url
-        url: "/admin/content",
-        // 渲染的模板页面
-        ejs: "admin/content",
-        // 查询的条件
-        where: {},
-        // 需要跨集合查询的条件
-        populate: ["category", "author"],
-        res: res,
-        req: req
-    });
-});
-
-// 博客内容的添加界面
-router.get("/content/add", (req, res, next) => {
-    // 从数据中读取分类信息
-    categoryModel.find({}, (err, categories) => {
-        if (!err) {
-            res.render("admin/content/add", {
-                userinfo: req.userinfo,
-                categories: categories
-            });
-            return;
-        } else {
-            throw err;
-            return;
-        }
-    });
-});
-
-// 内容添加的保存
-router.post("/content/add", (req, res, next) => {
-    let title = req.body.title;
-    let category = req.body.category;
-    let description = req.body.description;
-    let content = req.body.content;
-    // 后端进行简单的验证
-    if (title === "") {
-        // 如果标题为空，渲染错误页面
-        res.render("admin/error", {
-            url: null,
-            userinfo: req.userinfo,
-            message: "标题不能为空"
-        });
-        return;
-    } else if (description === "") {
-        // 如果简介为空，渲染错误页面
-        res.render("admin/error", {
-            url: null,
-            userinfo: req.userinfo,
-            message: "简介不能为空"
-        });
-        return;
-    } else if (content === "") {
-        // 如果正文为空，渲染错误页面
-        res.render("admin/error", {
-            url: null,
-            userinfo: req.userinfo,
-            message: "正文不能为空"
-        });
-        return;
-    } else {
-        // 一切正常，存入数据库
-        contentModel.create({
-            title: title,
-            category: category,
-            author: req.user._id.toString(),
-            description: description,
-            content: content
-        }, (err) => {
-            if (!err) {
-                // 保存成功
-                res.render("admin/success", {
-                    url: "/admin/content",
-                    userinfo: req.userinfo,
-                    message: "提交成功！"
-                });
-            } else {
-                throw err;
-            }
-        });
-    }
-});
-
-
-// 内容修改的界面
-router.get("/content/edit", (req, res, next) => {
-    // 获取需要修改内容的id
-    let id = req.query.id;
-    // 从数据库中查询
-    contentModel.findById(id, (err, content) => {
-        if (content) {
-            // 如果数据存在，从数据库中查询出所有分类
-            categoryModel.find({}, (err, categories) => {
-                if (!err) {
-                    // 渲染修改模板视图
-                    res.render("admin/content/edit", {
-                        userinfo: req.userinfo,
-                        categories: categories,
-                        content: content
-                    });
-                } else {
-                    throw err;
-                }
-            });
-        } else {
-            // 如果该内容不存在
-            res.render("admin/error", {
-                url: null,
-                userinfo: req.userinfo,
-                message: "该内容不存在！"
-            });
-        }
-    });
-});
-
-// 内容的修改保存
-router.post("/content/edit", (req, res, next) => {
-    // 获取数据
-    let title = req.body.title;
-    let category = req.body.category;
-    let description = req.body.description;
-    let content = req.body.content;
-    let id = req.query.id;
-
-    // 后端进行简单的验证
-    if (title === "") {
-        // 如果标题为空，渲染错误页面
-        res.render("admin/error", {
-            url: null,
-            userinfo: req.user,
-            message: "标题不能为空!"
-        });
-        return;
-    } else if (description === "") {
-        // 如果简介为空，渲染错误页面
-        res.render("admin/error", {
-          url: null,
-          userinfo: req.user,
-          message: "简介不能为空!"
-        });
-        return;
-    } else if (content === "") {
-        // 如果正文为空，渲染错误页面
-        res.render("admin/error", {
-          url: null,
-            userinfo: req.user,
-          message: "正文不能为空!"
-        });
-        return;
-    } else {
-        // 一切正常，更新数据库
-        contentModel.update({
-            _id: id
-        }, {
-                title: title,
-                category: category,
-                description: description,
-                content: content
-            }, (err) => {
-                if (!err) {
-                    // 保存成功
-                    res.render("admin/success", {
-                      url: "/admin/content",
-                      userinfo: req.user,
-                      message: "修改成功！"
-                    });
-                } else {
-                    throw err;
-                }
-            });
-    }
-});
-
-
-// 内容的删除
-router.get("/content/delete", (req, res, next) => {
-    // 获取id
-    let id = req.query.id;
-    // 根据id删除数据
-    contentModel.remove({
-        _id: id
-    }, (err) => {
-        if (!err) {
-            // 删除成功
-            res.render("admin/success", {
-                url: "/admin/content",
-                userinfo: req.userinfo,
-                message: "删除成功！"
-            });
-        } else {
-            // 出错
-            res.render("admin/error", {
-                url: "/admin/content",
-                userinfo: req.userinfo,
-                message: "删除失败！"
-            });
-        }
-    });
-});
 
 
 module.exports = router;

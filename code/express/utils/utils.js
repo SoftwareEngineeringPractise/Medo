@@ -19,3 +19,15 @@ module.exports.randomWord = function (randomFlag, min, max) {
   }
   return str
 }
+
+
+/**
+ * checkBody检查给定字符串是否符合给定规则
+ * 用户名: 长度至少6位 仅英文字符 
+ * 密码 : 长度至少4位  没有字符限制
+ * 邮件 : 符合邮件格式 example@about.com
+ * 手机号： 符合中国大陆手机号格式
+ * 
+ */
+
+

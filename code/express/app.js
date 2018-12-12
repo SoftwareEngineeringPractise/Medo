@@ -9,6 +9,9 @@ const uuid = require("uuid/v4");
 const flash = require("connect-flash");
 const expressValidator = require("express-validator");
 const cors = require('cors');
+const helmet = require('helmet');
+const favicon = require('serve-favicon');
+const compression = require("compression");
 require("./models/db");
 const passport = require('./config/passport');
 const tools = require("./middlewares/tools");
@@ -28,11 +31,12 @@ const wxapiRouter = require("./routes/api/wx");
 
 const app = express();
 app.use(cors());
+app.use(helmet());
+app.use(compression());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-// app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 
 
 app.use(logger('dev'));
@@ -41,7 +45,6 @@ app.use(flash());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
-
 
 
 
@@ -64,7 +67,7 @@ app.use(passport.session());
 
 
 app.use("/public", express.static(path.join(__dirname, "public")));
-
+app.use(favicon(path.join(__dirname, "public", "imgs", "favicon.ico")));
 
 app.all("/user", auth);
 app.all("/admin", auth);

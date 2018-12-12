@@ -1,4 +1,5 @@
 module.exports = {
+  baseurl:"localhost:3000",
   secret: "123456ea496d5d0c5c253a2e9025cf32",
   database: "mongodb://localhost:27017/medo_db",
   redis: "redis://localhost:6379",

@@ -5,7 +5,7 @@ const redis = require("../../../models/redis");
 const WxBizDataCrypt = require('../../../utils/wxBizDataCrypt');
 const mongoose = require('mongoose');
 const userModel = mongoose.model("user");
-const userspaceModel = mongoose.model("userspace");
+const userinfoModel = mongoose.model("userinfo");
 
 /**
  * 用户通过微信小程序进行注册／登陆
@@ -140,6 +140,7 @@ module.exports.authWithWeiXinApp2= function (req, res) {
 module.exports.userUpdateName = function (req, res) {
   if (req.user) {
     let name = req.query.name;
+    
     userModel.findOne({username:name}, (err, user)=>{
       if(err){
         res.tools.setJson(400, 1, err)
@@ -223,7 +224,7 @@ module.exports.userUpdatePassword = function(req, res) {
 
 module.exports.userUpdateSchool = function (req, res) {
   if (req.user) {
-    userspaceModel.findOne({user:req.user._id},(err, user)=> {
+    userinfoModel.findOne({userId:req.user._id},(err, user)=> {
       user.school = req.query.school;
       user.save(function(err, user) {
         if (err) {
@@ -240,7 +241,7 @@ module.exports.userUpdateSchool = function (req, res) {
 
 module.exports.userUpdateDepartment = function (req, res) {
   if (req.user) {
-    userspaceModel.findOne({ user: req.user._id },(err, user)=> {
+    userinfoModel.findOne({ userId: req.user._id },(err, user)=> {
       user.department = req.query.department;
       user.save(function (err, user) {
         if (err) {
