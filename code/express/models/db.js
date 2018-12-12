@@ -55,8 +55,9 @@ process.on('SIGTERM', function () {
 require('./category')
 require('./content')
 require('./user')
-require('./userspace')
+require('./userinfo')
 require("./file");
 require("./follow")
 require("./favorite")
+require("./emailvalidation");
 

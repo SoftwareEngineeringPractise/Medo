@@ -27,8 +27,12 @@
                                 <span class="text-info">阅读量：
                                     <%=content.views%> | 时间：
                                     <%=content.addTime%> | 作者:
-                                    <%=content.author.username%> | 分类:<a href="/?categoryId=<%=content.category._id%>">
-                                        <%=content.category.name%></a></span>
+                                    <a href="/user/<%=content.author.username%>">
+                                        <%=content.author.username%>
+                                    </a> | 分类:
+                                    <a href="/category/<%=content.category.name%>">
+                                        <%=content.category.name%>
+                                    </a></span>
                             </p>
                         </div>
                         <div class="jumbotron">

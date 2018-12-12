@@ -1,21 +1,22 @@
 const express = require("express");
 const userModel = require("../../models/user");
+const userinfoModel = require("../../models/userinfo");
 const contentModel = require("../../models/content");
-const userspaceModel = require("../../models/userspace");
 const categoryModel = require("../../models/category");
 const favoriteModel = require("../../models/favorite");
 const followModel = require("../../models/follow");
 const pagination = require("../../modules/api_pagination");
-// const passport = require("../../config/passport");
 const router = express.Router();
 const passport = require("passport");
 const ctrlUsers = require("./controllers/users");
+const ctrlFiles = require("./controllers/files");
 const redis = require("../../models/redis");
-// const path = require("path");
-// const fse = require("fs-extra");
-// const utils = require("../../utils/utils");
-// const multer = require("multer");
-// const moment = require("moment");
+const path = require("path");
+const fse = require("fs-extra");
+const utils = require("../../utils/utils");
+const multer = require("multer");
+const moment = require("moment");
+
 
 
 
@@ -131,9 +132,6 @@ router.post("/users/register", function(req, res, next) {
 });
 
 
-
-
-
 /**
  * 1. 获取用户简要信息
  */
@@ -161,7 +159,7 @@ router.get(
           hash: 0
         }
       )
-      .populate(["userspace"])
+      .populate(["userInfo"])
       .then(docs => {
         if (!docs) {
           res.tools.setJson(404, 2, "没有该用户！");
@@ -203,21 +201,14 @@ router.get(
           hash: 0
         }
       )
-      .populate()
+      .populate(['userinfo'])
       .then(docs => {
         if (docs.role != "Lab") {
           res.tools.setJson(404, 2, "没有该研究所！");
         } else if (!docs) {
           res.tools.setJson(404, 2, "没有该用户！");
         } else {
-          userspaceModel.findOne({user:userid}, (err, userspace)=>{
-            if(err){
-              res.tools.setJson(400, 1, err);
-            }
-            if(userspace){
-              res.tools.setJson(200, 0, "返回研究所信息" + userid, {user:docs, userspace:userspace});
-            }
-          })
+              res.tools.setJson(200, 0, "返回研究所信息" + userid, {user:docs});
         }
       })
       .catch(err => {
@@ -261,6 +252,29 @@ router.get(
     });
   }
 );
+
+
+
+// 查看指定id公告接口
+
+router.get("/views", (req, res) => {
+  let contentid = req.query.contentid;
+  contentModel.findById(contentid).populate([
+    "category",
+    {
+      path: "author",
+      select: "username isadmin verified _id",
+    }
+  ]).then((content) => {
+    let contentHtml = marked(content.content);
+    res.tools.setJson(200, 0, "返回id为" + contentid + "的公告", {
+      contentHtml: contentHtml,
+      content: content
+    });
+    content.views++;
+    content.save();
+  });
+});
 
 
   /**
@@ -667,7 +681,7 @@ router.get('/search/username/:q', (req, res, next)=>{
 // 按学校搜索 参数 q 返回 学校包含字符串q的所有userspace
 router.get('/search/school/:q', (req, res, next) => {
   let query = req.params.q || "";
-  userspaceModel.find({ school: { $regex: query, $options: "i" } }, function (
+  userinfoModel.find({ school: { $regex: query, $options: "i" } }, function (
     err,
     docs
   ) {
@@ -683,7 +697,7 @@ router.get('/search/school/:q', (req, res, next) => {
 // 按院系搜索 参数 q  返回 院系包含字符串q的所有userspace
 router.get('/search/department/:q', (req, res, next) => {
   let query = req.params.q || "";
-  userspaceModel.find(
+  userinfoModel.find(
     { department: { $regex: query, $options: "i" } },
     function(err, docs) {
       if (err) {
@@ -701,36 +715,45 @@ router.get('/search/department/:q', (req, res, next) => {
 /**
  * 活动文件服务
  */
-// const storageActivity = multer.diskStorage({
-//     destination: function (req, file, cb) {
-//         let year = moment().get('year')
-//         let month = moment().get('month') + 1
-//         let day = moment().get('date')
-//         let filePath = path.resolve(__dirname, `../../../public/image/activities/${year}/${month}/${day}`)
+const storageActivity = multer.diskStorage({
+    destination: function (req, file, cb) {
+        let year = moment().get('year')
+        let month = moment().get('month') + 1
+        let day = moment().get('date')
+        let filePath = path.resolve(__dirname, `../../public/imgs/activities/${year}/${month}/${day}`)
 
-//         fse.ensureDir(filePath, function () {
-//             cb(null, filePath)
-//         })
-//     },
-//     filename: function (req, file, cb) {
-//         let name = utils.randomWord(false, 12)
-//         if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/jpg') {
-//             name = name + '.jpg'
-//         } else if (file.mimetype === 'image/png') {
-//             name = name + '.png'
-//         }
-//         cb(null, name)
-//     }
-// })
-// const uploadActivity = multer({ storage: storageActivity })
+        fse.ensureDir(filePath, function () {
+            cb(null, filePath)
+        })
+    },
+    filename: function (req, file, cb) {
+        let name = utils.randomWord(false, 12)
+        if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/jpg') {
+            name = name + '.jpg'
+        } else if (file.mimetype === 'image/png') {
+            name = name + '.png'
+        }
+        cb(null, name)
+    }
+})
+const uploadActivity = multer({ storage: storageActivity })
 // // todo:需要加入权限验证才能进行上传／删除文件
 
-// router.post('/file/activity',
-//     uploadActivity.single('image'),
-//     ctrlFiles.fileCreate
-// )
-// router.delete('/file/*?',
-//     ctrlFiles.fileDeleteOne
-// )
+
+router.use((req, res, next) => {
+  if (req.user) {
+    next();
+  } else {
+    res.tools.setJson(200, 1, "您没有登陆！");
+  }
+});
+
+router.post('/file/upload/:op',
+  uploadActivity.single('file'),
+    ctrlFiles.fileCreate
+)
+router.delete('/file/*?',
+    ctrlFiles.fileDeleteOne
+)
 
 module.exports = router;

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const userModel = require('../../../models/user')
 const fs = require('fs')
 
 const File = mongoose.model('file')
@@ -9,21 +10,40 @@ module.exports.fileCreate = function (req, res) {
     if (req.body.fileName !== undefined) {
       name = req.body.fileName
     }
-    let path = req.file.path
+    let path = req.file.path;
+    let op = req.params.op;
     // 所有文件都保存在public目录下面
-    let url = path.substring(path.indexOf('/public/') + 7)
+    path = path.replace(/\\/g, "/");
+    let url = path.substring(path.indexOf('public')-1);
+    let where = {};
+    if (op == 'avatar') {
+      where.avatarUrl = url;
+    } else if (op == 'bg') {
+      where.bgUrl = url;
+    }
+    userModel.findByIdAndUpdate(req.user._id,
+      {$set: where},
+      {new: true},
+      (err, myuser)=>{
+      if(err){
+        return res.tools.setJson(400, 1, err);
+      }
+      if (!myuser){
+        return res.tools.setJson(400, 1, "登陆状态失效！");
+      }
+    })
     File.create({
       name: name,
       size: req.file.size,
       type: req.file.mimetype,
       path: path,
       url: url
-    }, function (err, file) {
+    }, function (err, newfile) {
       if (err) {
         return res.tools.setJson(400, 1, err)
       } else {
         return res.tools.setJson(201, 0, 'success', {
-          file: file
+          file: newfile
         })
       }
     })

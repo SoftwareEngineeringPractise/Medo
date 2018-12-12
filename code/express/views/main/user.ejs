@@ -11,16 +11,154 @@
     <div class="wrap">
         <div class="main">
             <%- include("nav")%>
-            <div class="container">
-                <div class="page-header">
-                    <!-- Header -->
-                    <%= username%>
+
+            <main role="main" class="App-main">
+                <div id="ProfileHeader" class="ProfileHeader">
+                    <div class="Card">
+                        <div class="ProfileHeader-userCover">
+                            <div class="UserCoverEditor">
+                                <div>
+                                    <label class="UploadPicture-wrapper">
+                                            <input type="file" name="file" id="xFile" url="/api/web/file/upload/bg" 
+                                            bind-img="UserCover-image" onchange="upload(this);" accept="image/png,image/jpeg"
+                                            class="hide UploadPicture-input">
+                                        <button type="button" onclick="javaScript:$('#xFile').click();" class="Button UserCoverEditor-simpleEditButton DynamicColorButton DynamicColorButton--dark">
+                                            <svg viewBox="0 0 20 16" class="Icon Icon--camera Icon--left" style="height: 16px; width: 14px;"
+                                                width="14" height="16" aria-hidden="true">
+                                                <title></title>
+                                                <g>
+                                                    <path d="M18.094 2H15s-1-2-2-2H7C6 0 5 2 5 2H2C0 2 0 3.967 0 3.967V14c0 2 2.036 2 2.036 2H17c3 0 3-1.983 3-1.983V4c0-2-1.906-2-1.906-2zM10 12c-1.933 0-3.5-1.567-3.5-3.5S8.067 5 10 5s3.5 1.567 3.5 3.5S11.933 12 10 12zm0 1.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm7.5-8c-.552 0-1-.448-1-1s.448-1 1-1 1 .448 1 1-.448 1-1 1z"
+                                                        fill-rule="evenodd"></path>
+                                                </g>
+                                            </svg>编辑封面图片
+                                        </button>
+                                    </label>
+                                    <div class="UserCover"><img id="UserCover-image" class="UserCover-image" src="<%= docs.bgUrl%>"
+                                            alt="用户封面"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ProfileHeader-wrapper">
+                            <div class="ProfileHeader-main">
+                                <div>
+                                    <div class="UserAvatarEditor ProfileHeader-avatar" style="top: -57px;">
+                                        <div class="UserAvatar"><img onclick="javaScript:$('#yFile').click();"  id="Avatar-image" class="Avatar Avatar--large UserAvatar-inner" src="<%= docs.avatarUrl%>"
+                                                width="160" height="160"></div><label class="UploadPicture-wrapper">
+                                                    <input
+                                                type="file" name="file" id="yFile" url="/api/web/file/upload/avatar" accept="image/png,image/jpeg" bind-img="Avatar-image" onchange="upload(this);" class="hide UploadPicture-input">
+                                            <div class="Mask UserAvatarEditor-mask Mask-hidden">
+                                                <div class="Mask-mask Mask-mask--black UserAvatarEditor-maskInner"></div>
+                                                <div class="Mask-content"><svg class="Zi Zi--Camera UserAvatarEditor-cameraIcon"
+                                                        fill="currentColor" viewBox="0 0 24 24" width="36" height="36">
+                                                        <path d="M20.094 6S22 6 22 8v10.017S22 20 19 20H4.036S2 20 2 18V7.967S2 6 4 6h3s1-2 2-2h6c1 0 2 2 2 2h3.094zM12 16a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7zm0 1.5a5 5 0 1 0-.001-10.001A5 5 0 0 0 12 17.5zm7.5-8a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"
+                                                            fill-rule="evenodd"></path>
+                                                    </svg>
+                                                    <div class="UserAvatarEditor-maskInnerText">修改我的头像</div>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="ProfileHeader-content">
+                                    <div class="ProfileHeader-contentHead">
+                                        <h1 class="ProfileHeader-title"><span class="ProfileHeader-name"><%= docs.username%></span><span
+                                                class="RichText ztext ProfileHeader-headline"><%= docs.motto%></span></h1>
+                                    </div>
+                                    <div style="overflow: hidden; transition: height 300ms ease-out 0s; height: 20px;"
+                                        class="ProfileHeader-contentBody">
+                                        <div>
+                                            <div class="ProfileHeader-info">
+                                                <div class="ProfileHeader-infoItem">
+                                                    <div class="ProfileHeader-iconWrapper"><svg width="14" height="16"
+                                                            viewBox="0 0 14 14" class="Icon Icon--male" style="height: 16px; width: 14px;"
+                                                            aria-hidden="true">
+                                                            <title></title>
+                                                            <g>
+                                                                <path d="M3.025 10.64c-1.367-1.366-1.367-3.582 0-4.95 1.367-1.366 3.583-1.366 4.95 0 1.367 1.368 1.367 3.584 0 4.95-1.367 1.368-3.583 1.368-4.95 0zm10.122-9.368c-.002-.414-.34-.75-.753-.753L8.322 0c-.413-.002-.746.33-.744.744.002.413.338.75.75.752l2.128.313c-.95.953-1.832 1.828-1.832 1.828-2.14-1.482-5.104-1.27-7.013.64-2.147 2.147-2.147 5.63 0 7.777 2.15 2.148 5.63 2.148 7.78 0 1.908-1.91 2.12-4.873.636-7.016l1.842-1.82.303 2.116c.003.414.34.75.753.753.413.002.746-.332.744-.745l-.52-4.073z"
+                                                                    fill-rule="evenodd"></path>
+                                                            </g>
+                                                        </svg></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="ProfileHeader-contentFooter"><button type="button" class="Button ProfileHeader-expandButton Button--plain"><svg
+                                                viewBox="0 0 10 6" class="Icon ProfileHeader-arrowIcon Icon--arrow"
+                                                style="height: 16px; width: 10px;" width="10" height="16" aria-hidden="true">
+                                                <title></title>
+                                                <g>
+                                                    <path d="M8.716.217L5.002 4 1.285.218C.99-.072.514-.072.22.218c-.294.29-.294.76 0 1.052l4.25 4.512c.292.29.77.29 1.063 0L9.78 1.27c.293-.29.293-.76 0-1.052-.295-.29-.77-.29-1.063 0z"></path>
+                                                </g>
+                                            </svg>查看详细资料</button>
+                                        <div class="ProfileButtonGroup ProfileHeader-buttons"><button type="button"
+                                                class="Button Button--blue">编辑个人资料</button></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <!-- Body&Content -->
+                <div class="Profile-main">
+                    <div class="Profile-mainColumn">
+                        <div class="Card ProfileMain" id="ProfileMain">
+                            <div class="ProfileMain-header">
+                                <ul role="tablist" class="Tabs ProfileMain-tabs">
+                                    <li role="tab" class="Tabs-item Tabs-item--noMeta" aria-controls="Profile-activities"><a
+                                            class="Tabs-link" href="https://www.zhihu.com/people/Peterial/activities">动态</a></li>
+                                    <li role="tab" class="Tabs-item" aria-controls="Profile-answers"><a class="Tabs-link"
+                                            href="https://www.zhihu.com/people/Peterial/answers">回答<span class="Tabs-meta">2</span></a></li>
+                                    <li role="tab" class="Tabs-item" aria-controls="Profile-asks"><a class="Tabs-link"
+                                            href="https://www.zhihu.com/people/Peterial/asks">提问<span class="Tabs-meta">1</span></a></li>
+                                    <li role="tab" class="Tabs-item" aria-controls="Profile-posts"><a class="Tabs-link"
+                                            href="https://www.zhihu.com/people/Peterial/posts">文章<span class="Tabs-meta">0</span></a></li>
+                                    <li role="tab" class="Tabs-item" aria-controls="Profile-columns"><a class="Tabs-link"
+                                            href="https://www.zhihu.com/people/Peterial/columns">专栏<span class="Tabs-meta">0</span></a></li>
+                                    <li role="tab" class="Tabs-item" aria-controls="Profile-pins"><a meta="0" class="Tabs-link is-active"
+                                            href="https://www.zhihu.com/people/Peterial/pins">想法<span class="Tabs-meta">0</span></a></li>
+                                    <li role="tab" class="Tabs-item Tabs-item--noMeta">
+                                        <div class="Popover Tabs-link"><button type="button" id="Popover3-toggle"
+                                                aria-haspopup="true" aria-expanded="false" aria-owns="Popover3-content"
+                                                class="Button ProfileMain-menuToggler Button--plain">更多<svg viewBox="0 0 10 6"
+                                                    class="Icon ProfileMain-tabIcon Icon--arrow" style="height: 16px; width: 10px;"
+                                                    width="10" height="16" aria-hidden="true">
+                                                    <title></title>
+                                                    <g>
+                                                        <path d="M8.716.217L5.002 4 1.285.218C.99-.072.514-.072.22.218c-.294.29-.294.76 0 1.052l4.25 4.512c.292.29.77.29 1.063 0L9.78 1.27c.293-.29.293-.76 0-1.052-.295-.29-.77-.29-1.063 0z"></path>
+                                                    </g>
+                                                </svg></button></div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div>
+                                <div>
+                                    <div class="Sticky" style=""></div>
+                                </div>
+                            </div>
+                            <div class="List" id="Profile-posts">
+                                <div class="List-header">
+                                    <h4 class="List-headerText"><span>我的想法</span></h4>
+                                    <div class="List-headerOptions"></div>
+                                </div>
+                                <div class="EmptyState">
+                                    <div class="EmptyState-inner"><svg xmlns="http://www.w3.org/2000/svg" width="150"
+                                            height="120" viewBox="0 0 150 120" class="EmptyState-image">
+                                            <title></title>
+                                            <g>
+                                                <g fill="none" fill-rule="evenodd">
+                                                    <path fill="#EBEEF5" fill-rule="nonzero" d="M102 30.998A2.996 2.996 0 0 0 98.998 28H50.002A2.996 2.996 0 0 0 47 30.998v58.147l.193-.125c1.453-.94 3.473-.94 4.927 0l2.537 1.64 2.536-1.64c1.453-.94 3.473-.94 4.927 0l2.537 1.64 2.536-1.64c1.453-.94 3.473-.94 4.927 0l2.537 1.64 2.536-1.64c1.453-.94 3.473-.94 4.927 0l2.537 1.64 2.536-1.64c1.453-.94 3.473-.94 4.927 0l2.537 1.64 2.536-1.64c1.413-.913 3.363-.94 4.807-.075V30.998zm-1.508 60.542c-.464-.3-1.21-.298-1.67 0l-4.165 2.692-4.165-2.692c-.464-.3-1.21-.298-1.67 0l-4.165 2.692-4.165-2.692c-.464-.3-1.21-.298-1.67 0l-4.165 2.692-4.165-2.692c-.464-.3-1.21-.298-1.67 0l-4.165 2.692-4.165-2.692c-.464-.3-1.21-.298-1.67 0l-4.165 2.692-4.165-2.692c-.464-.3-1.21-.298-1.67 0l-4.316 2.79A1.99 1.99 0 0 1 44 93V30.997C44 27.687 46.68 25 50.002 25h48.996A5.996 5.996 0 0 1 105 30.998v62c0 .45-.147.866-.396 1.2l-4.112-2.658z"></path>
+                                                    <path fill="#F7F8FA" d="M55 39c0-.553.44-1 1-1h19c.553 0 1 .44 1 1v19c0 .553-.44 1-1 1H56c-.553 0-1-.44-1-1V39zm25 .5c0-.828.675-1.5 1.498-1.5h11.004c.827 0 1.498.666 1.498 1.5 0 .828-.675 1.5-1.498 1.5H81.498A1.495 1.495 0 0 1 80 39.5zm0 9c0-.828.675-1.5 1.498-1.5h11.004c.827 0 1.498.666 1.498 1.5 0 .828-.675 1.5-1.498 1.5H81.498A1.495 1.495 0 0 1 80 48.5zm0 9c0-.828.675-1.5 1.498-1.5h11.004c.827 0 1.498.666 1.498 1.5 0 .828-.675 1.5-1.498 1.5H81.498A1.495 1.495 0 0 1 80 57.5zm-25 9c0-.828.677-1.5 1.505-1.5h35.99a1.5 1.5 0 1 1 0 3h-35.99A1.5 1.5 0 0 1 55 66.5zm0 9c0-.828.665-1.5 1.505-1.5h24.99a1.5 1.5 0 1 1 0 3h-24.99A1.5 1.5 0 0 1 55 75.5z"></path>
+                                                </g>
+                                            </g>
+                                        </svg><span>还没有想法</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
         </div>
+        </main>
+    </div>
+    </div>
 
     </div>
     <%- include("footer")%>

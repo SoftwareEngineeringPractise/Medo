@@ -1,8 +1,11 @@
 const express = require("express");
-const contentModel = require("../models/content");
 const marked = require("marked");
 const pagination = require("../modules/pagination");
 const passport = require("passport");
+const emailModel = require("../models/emailvalidation");
+const userModel = require("../models/user");
+const contentModel = require("../models/content");
+const categoryModel = require("../models/category");
 const router = express.Router();
 
 
@@ -42,7 +45,7 @@ router.get("/users/login", (req, res) => {
 });
 
 router.get("/test", (req, res)=>{
-        res.render("main/test");
+  res.render("main/test");
 });
 
 
@@ -58,6 +61,9 @@ router.post("/users/login", function (req, res, next) {
     }
     if (!user) {
       return res.send({ success: false, message: "authentication failed" });
+    }
+    if(user.status!=1){
+      return res.send({success:false, message:"email is not validated"});
     }
     req.login(user, loginErr => {
       if (loginErr) {
@@ -91,8 +97,136 @@ router.post("/users/register", function(req, res, next) {
 });
 
 
+router.get("/emailvalidation", function(req, res, next){
+  let code = req.query.v;
+  emailModel.findOneAndDelete({code:code}, (err, emailval)=>{
+    if(err){
+      return res.render("main/emailval", { success: false, msg: err});
+    }
+    if(!emailval){
+      return res.render("main/emailval", {success:false, msg: "该链接不存在或已经失效！"});
+    }
+    let id = emailval.userId;
+    userModel.findById(id, (err, user)=>{
+      if(err){
+        return res.render("main/emailval", { success: false, msg:err});
+      }
+      user.status = 1;
+      user.save();
+      res.set("refresh", "5;url=/users/login");
+      return res.render("main/emailval", { success: true, msg: "邮箱认证成功！"});
+    });
+    
+  })
+  // res.json({code : code});
+});
 
 
+
+router.get("/me", (req, res) => {
+  if (req.isAuthenticated() && req.user.status == 1) {
+    userModel.findById(
+      req.user._id,
+      {
+        // 去除保密字段
+        _id: 0,
+        password: 0,
+        salt: 0,
+        hash: 0
+      }
+    )
+      .populate(["userInfo"])
+      .then(docs => {
+        if (!docs) {
+          res.render("main/error", { message: "没有该用户！" });
+        } else {
+          res.render("main/user", { message: "返回我的信息", docs: docs });
+        }
+      })
+      .catch(err => {
+        res.render("main/error", { message: err });
+      });
+  }
+  else {
+    res.render("main/error", { message: "用户没有登录" });
+  }
+});
+
+
+router.get("/user/:username", function (req, res) {
+  let name = req.params.username;
+  userModel.findOne({ username: name }, (err, specificuser) => {
+    if (err) {
+      return res.render("main/error", { message: err });
+    }
+    if (specificuser == null) {
+      return res.render("main/error", { message: "该用户不存在！" });
+    } else {
+      pagination({
+        limit: 2,
+        model: contentModel,
+        url: "/",
+        ejs: "main/index",
+        where: { author: specificuser._id },
+        res: res,
+        req: req,
+        populate: ["category", "author"],
+        // 其他数据
+        data: {}
+      });
+    }
+  })
+})
+
+router.get("/content/:username", (req, res)=>{
+  let name = req.params.username;
+  userModel.findOne({ username: name }, (err, specificuser) => {
+    if (err) {
+      res.render("main/error", { message: err });
+    }
+    if (!specificuser) {
+      res.render("main/error", { message: "该用户不存在！" });
+    }
+    console.log(specificuser);
+    pagination({
+      limit: 10,
+      model: contentModel,
+      url: "/",
+      ejs: "main/index",
+      where: { author: specificuser._id },
+      res: res,
+      req: req,
+      populate: ["category", "author"],
+      // 其他数据
+      data: {}
+    });
+
+  })
+})
+
+
+router.get("/category/:categoryname", function(req, res) {
+  let name = req.params.categoryname;
+  categoryModel.findOne({ name: name }, (err, category) => {
+    if (err) {
+      res.render("main/error", { message: err });
+    } else if (!category) {
+      res.render("main/error", { message: "该分类不存在！" });
+    }
+    pagination({
+      limit: 2,
+      model: contentModel,
+      url: "/",
+      ejs: "main/index",
+      where: { category: category._id },
+      res: res,
+      req: req,
+      populate: ["category", "author"],
+      // 其他数据
+      data: {}
+    });
+  });
+});
 
 router.get("/views", (req, res) => {
   let contentid = req.query.contentId;

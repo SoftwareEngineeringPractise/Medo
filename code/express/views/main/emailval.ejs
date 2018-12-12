@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include("../include")%>
+    <!-- <meta http-equiv="refresh" content="5;url=http://example.com/" /> -->
+    <title>Medo</title>
+
+</head>
+
+<body background="/public/imgs/material-grey-light-4k.jpg">
+    
+    <div class="wrap">
+        <div class="main">
+            <%- include("nav")%>
+            <div class="container">
+                <div class="page-header">
+                    <!-- Header -->
+                </div>
+                <div>
+                    <!-- Body&Content -->
+                </div>
+            </div>
+        </div>
+        <div>
+            <% if(success){%>
+                            <center>
+                                <%= msg %>
+                            </center>
+                        <center><font id="num">5<font> </center>
+                            <center>
+                                <a href="/users/login">直接跳转</a>
+                            </center>
+            <%} else{%>
+            <center>
+                <%= msg %>
+            </center>
+            <%}%>
+
+        </div>
+    </div>
+    <%- include("footer")%>
+</body>
+<script type="text/javascript">
+    function recount(num) {
+        if (num > 0) {
+            num--;
+            setTimeout(function () { recount(num); }, 1000);
+            $('#num').html(num+ 's后自动跳转到登录页面...');
+        } else {
+            console.log("end");
+        }
+    }
+    recount(6);
+</script>
+
+</html>

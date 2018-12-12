@@ -2,11 +2,17 @@ const express = require("express");
 const userModel = require("../../models/user");
 const contentModel = require("../../models/content");
 const categoryModel = require("../../models/category");
-const userspaceModel = require("../../models/userspace");
 const pagination = require("../../modules/api_pagination");
 const passport = require("../../config/passport");
+// const ctrlUsers = require("./controllers/users");
+const ctrlFiles = require("./controllers/files");
 const marked = require("marked");
 const router = express.Router();
+const path = require("path");
+const fse = require("fs-extra");
+const utils = require("../../utils/utils");
+const multer = require("multer");
+const moment = require("moment");
 
 // Markdown Support
 marked.setOptions({
@@ -148,292 +154,294 @@ router.get("/views", (req, res) => {
 
 // 用户信息
 router.post("/userinfo", (req, res, next) => {
-    console.log(req.user);
-    if(req.isAuthenticated()){
-        userspaceModel.findOne({ user: req.user._id },(err, userspace) => {
-            if (userspace) {
-                let userinfo = { username: req.user.username, isadmin: req.user.isadmin, phonenumber: req.user.phonenumber, 
-                    email: req.user.email, role: req.user.role, detail: userspace };
-                return res.tools.setJson(200, 0, "用户信息返回成功！", userinfo);
+    if (req.isAuthenticated()) {
+        userModel
+          .findOne({ _id: req.user._id }, { // 去除保密字段
+              _id: 0, password: 0, salt: 0, hash: 0 })
+          .populate(["userInfo"])
+          .then(docs => {
+            if (!docs) {
+              res.tools.setJson(200, 1, "没有该用户！");
             } else {
-                responseData.code = 1;
-                responseData.message = "没有该用户！";
-                return res.json(responseData);
+              res.tools.setJson(200, 0, "用户信息返回成功！", docs);
             }
-        });
+          })
+          .catch(err => {
+            res.tools.setJson(404, 1, err);
+          });
     } else {
-        responseData.code = 2;
-        responseData.message = "用户未登录！";
-        return res.json(responseData);
+        return res.tools.setJson(200, 1, "用户未登录！");
     }
 });
 
 
 // 用户基本信息修改,不需要后台管理员审核
-router.post("/userinfo/edit", (req, res, next) => {
-    if(req.isAuthenticated()){
-        let username = req.body.username || req.user.username;
-        let password = req.body.password || req.user.password;
-        let phonenumber = req.body.phonenumber || req.user.phonenumber;
-        let firstname = req.body.firstname || req.user.firstname;
-        let lastname = req.body.lastname || req.user.lastname;
-        let email = req.body.email || req.user.email;
-        userspaceModel.findOne({ user: req.user._id }).populate(["user"]).then(userspace => {
-            if (userspace) {
-              if (username === "admin" && req.user.username != "admin") {
-                  responseData.code = 2;
-                  responseData.message = "不能直接修改超级管理员用户!";
-                  res.json(responseData);
-                return;
-              }
-                // let likes = req.body.likes || userspace.likes;
-                let gender = req.body.gender || userspace.gender;
-                let motto = req.body.motto || userspace.motta;
-                let description = req.body.description || userspace.description;
-                let realname = req.body.realname || userspace.realname;
-              // 数据没有变更
-              if (username === userspace.user.username && password === userspace.user.password && phonenumber === userspace.user.phonenumber && firstname === userspace.user.firstname && lastname === userspace.user.lastname && email === userspace.user.email && gender === userspace.gender && motto === userspace.motto && description === userspace.description && realname === userspace.realname) {
-                responseData.code = 2;
-                responseData.message = "未修改任何数据！";
-                res.json(responseData);
-                return;
-              }
-              // 查询用户是否与数据库中的冲突
-              userModel.findOne(
-                {
-                  _id: { $ne: userspace.user },
-                  username: username
-                },
-                (err, docs) => {
-                  if (docs) {
-                    // 数据冲突
-                    responseData.code = 2;
-                    responseData.message = "该用户已存在！";
-                    res.json(responseData);
-                    return;
-                  } else {
-                    // 后端进行简单的验证
-                    if (username === "") {
-                      // 如果标题为空，渲染错误页面
-                      responseData.code = 2;
-                      responseData.message = "用户名不能为空!";
-                      res.json(responseData);
-                      return;
-                    } else if (password === "") {
-                      // 如果简介为空，渲染错误页面
-                      responseData.code = 2;
-                      responseData.message = "密码不能为空!";
-                      res.json(responseData);
-                      return;
-                    } else if (
-                      username === "admin" &&
-                      req.user.username != "admin"
-                    ) {
-                      responseData.code = 2;
-                      responseData.message =
-                        "不能直接修改超级管理员用户!";
-                      res.json(responseData);
-                      return;
-                    } else {
-                      userModel.update(
-                        {
-                          _id: userspace.user
-                        },
-                        {
-                          username: username,
-                          password: password,
-                          email: email,
-                          phonenumber: phonenumber,
-                          firstname: firstname,
-                          lastname: lastname,
-                        },
-                        err => {
-                          if (!err) {
-                            if (
-                              req.user.username !=
-                              userspace.user.username
-                            ) {
-                              req.logout();
-                              responseData.message =
-                                "修改用户核心信息，退出登录";
-                            }
-                            userspaceModel.update(
-                              {
-                                user: userspace.user
-                              },
-                              {
-                                gender: gender,
-                                motto: motto,
-                                description: description,
-                                realname: realname
-                              },
-                              err => {
-                                if (!err) {
-                                  responseData.code = 0;
-                                  responseData.message = "用户信息修改完成";
-                                  res.json(responseData);
-                                } else {
-                                  throw err;
-                                }
-                              }
-                            );
-                          } else {
-                            throw err;
-                          }
-                        }
-                      );
-                    }
-                  }
-                }
-              );
-            } else {
-              // 若不存在
-              responseData.code = 2;
-              responseData.message = "该用户不存在！";
-              res.json(responseData);
-              return;
-            }
-        });
-    } else {
-        responseData.code = 2;
-        responseData.message = "用户未登录！";
-        return res.json(responseData);
-    }
-});
+// router.post("/userinfo/edit", (req, res, next) => {
+//     if(req.isAuthenticated()){
+//         let username = req.body.username || req.user.username;
+//         let password = req.body.password || req.user.password;
+//         let phonenumber = req.body.phonenumber || req.user.phonenumber;
+//         let firstname = req.body.firstname || req.user.firstname;
+//         let lastname = req.body.lastname || req.user.lastname;
+//         let email = req.body.email || req.user.email;
+//         userspaceModel.findOne({ user: req.user._id }).populate(["user"]).then(userspace => {
+//             if (userspace) {
+//               if (username === "admin" && req.user.username != "admin") {
+//                   responseData.code = 2;
+//                   responseData.message = "不能直接修改超级管理员用户!";
+//                   res.json(responseData);
+//                 return;
+//               }
+//                 // let likes = req.body.likes || userspace.likes;
+//                 let gender = req.body.gender || userspace.gender;
+//                 let motto = req.body.motto || userspace.motta;
+//                 let description = req.body.description || userspace.description;
+//                 let realname = req.body.realname || userspace.realname;
+//               // 数据没有变更
+//               if (username === userspace.user.username && password === userspace.user.password && phonenumber === userspace.user.phonenumber && firstname === userspace.user.firstname && lastname === userspace.user.lastname && email === userspace.user.email && gender === userspace.gender && motto === userspace.motto && description === userspace.description && realname === userspace.realname) {
+//                 responseData.code = 2;
+//                 responseData.message = "未修改任何数据！";
+//                 res.json(responseData);
+//                 return;
+//               }
+//               // 查询用户是否与数据库中的冲突
+//               userModel.findOne(
+//                 {
+//                   _id: { $ne: userspace.user },
+//                   username: username
+//                 },
+//                 (err, docs) => {
+//                   if (docs) {
+//                     // 数据冲突
+//                     responseData.code = 2;
+//                     responseData.message = "该用户已存在！";
+//                     res.json(responseData);
+//                     return;
+//                   } else {
+//                     // 后端进行简单的验证
+//                     if (username === "") {
+//                       // 如果标题为空，渲染错误页面
+//                       responseData.code = 2;
+//                       responseData.message = "用户名不能为空!";
+//                       res.json(responseData);
+//                       return;
+//                     } else if (password === "") {
+//                       // 如果简介为空，渲染错误页面
+//                       responseData.code = 2;
+//                       responseData.message = "密码不能为空!";
+//                       res.json(responseData);
+//                       return;
+//                     } else if (
+//                       username === "admin" &&
+//                       req.user.username != "admin"
+//                     ) {
+//                       responseData.code = 2;
+//                       responseData.message =
+//                         "不能直接修改超级管理员用户!";
+//                       res.json(responseData);
+//                       return;
+//                     } else {
+//                       userModel.update(
+//                         {
+//                           _id: userspace.user
+//                         },
+//                         {
+//                           username: username,
+//                           password: password,
+//                           email: email,
+//                           phonenumber: phonenumber,
+//                           firstname: firstname,
+//                           lastname: lastname,
+//                         },
+//                         err => {
+//                           if (!err) {
+//                             if (
+//                               req.user.username !=
+//                               userspace.user.username
+//                             ) {
+//                               req.logout();
+//                               responseData.message =
+//                                 "修改用户核心信息，退出登录";
+//                             }
+//                             userspaceModel.update(
+//                               {
+//                                 user: userspace.user
+//                               },
+//                               {
+//                                 gender: gender,
+//                                 motto: motto,
+//                                 description: description,
+//                                 realname: realname
+//                               },
+//                               err => {
+//                                 if (!err) {
+//                                   responseData.code = 0;
+//                                   responseData.message = "用户信息修改完成";
+//                                   res.json(responseData);
+//                                 } else {
+//                                   throw err;
+//                                 }
+//                               }
+//                             );
+//                           } else {
+//                             throw err;
+//                           }
+//                         }
+//                       );
+//                     }
+//                   }
+//                 }
+//               );
+//             } else {
+//               // 若不存在
+//               responseData.code = 2;
+//               responseData.message = "该用户不存在！";
+//               res.json(responseData);
+//               return;
+//             }
+//         });
+//     } else {
+//         responseData.code = 2;
+//         responseData.message = "用户未登录！";
+//         return res.json(responseData);
+//     }
+// });
 
 
 // 用户关键信息修改, 需要后台管理员审核
-router.post("/verifiedinfo/edit", (req, res, next) => {
-    if (req.isAuthenticated()) {
-        // let s'chon'e = req.body.username || req.user.username;
-        // let password = req.body.password || req.user.password;
-        // let phonenumber = req.body.phonenumber || req.user.phonenumber;
-        // let firstname = req.body.firstname || req.user.firstname;
-        // let lastname = req.body.lastname || req.user.lastname;
-        // let email = req.body.email || req.user.email;
-        userspaceModel.findOne({ user: req.user._id }).populate(["user"]).then(userspace => {
-            if (userspace) {
-                if (username === "admin" && req.user.username != "admin") {
-                    responseData.code = 2;
-                    responseData.message = "不能直接修改超级管理员用户!";
-                    res.json(responseData);
-                    return;
-                }
-                let role = req.user.role || userspace.role;
-                let school = req.body.school || userspace.school;
-                let department = req.body.department || userspace.department;
-                let institute = req.body.institute || userspace.institute;
-                // 数据没有变更
-                if (username === userspace.user.username && password === userspace.user.password && phonenumber === userspace.user.phonenumber && firstname === userspace.user.firstname && lastname === userspace.user.lastname && email === userspace.user.email && gender === userspace.gender && motto === userspace.motto && description === userspace.description && realname === userspace.realname) {
-                    responseData.code = 2;
-                    responseData.message = "未修改任何数据！";
-                    res.json(responseData);
-                    return;
-                }
-                // 查询用户是否与数据库中的冲突
-                userModel.findOne(
-                    {
-                        _id: { $ne: userspace.user },
-                        username: username
-                    },
-                    (err, docs) => {
-                        if (docs) {
-                            // 数据冲突
-                            responseData.code = 2;
-                            responseData.message = "该用户已存在！";
-                            res.json(responseData);
-                            return;
-                        } else {
-                            // 后端进行简单的验证
-                            if (username === "") {
-                                // 如果标题为空，渲染错误页面
-                                responseData.code = 2;
-                                responseData.message = "用户名不能为空!";
-                                res.json(responseData);
-                                return;
-                            } else if (password === "") {
-                                // 如果简介为空，渲染错误页面
-                                responseData.code = 2;
-                                responseData.message = "密码不能为空!";
-                                res.json(responseData);
-                                return;
-                            } else if (
-                                username === "admin" &&
-                                req.user.username != "admin"
-                            ) {
-                                responseData.code = 2;
-                                responseData.message =
-                                    "不能直接修改超级管理员用户!";
-                                res.json(responseData);
-                                return;
-                            } else {
-                                userModel.update(
-                                    {
-                                        _id: userspace.user
-                                    },
-                                    {
-                                        username: username,
-                                        password: password,
-                                        email: email,
-                                        phonenumber: phonenumber,
-                                        firstname: firstname,
-                                        lastname: lastname
-                                    },
-                                    err => {
-                                        if (!err) {
-                                            if (
-                                                req.user.username !=
-                                                userspace.user.username
-                                            ) {
-                                                req.logout();
-                                                responseData.message =
-                                                    "修改用户核心信息，退出登录";
-                                            }
-                                            userspaceModel.update(
-                                                {
-                                                    user: userspace.user
-                                                },
-                                                {
-                                                    gender: gender,
-                                                    motto: motto,
-                                                    description: description,
-                                                    realname: realname
-                                                },
-                                                err => {
-                                                    if (!err) {
-                                                        responseData.code = 0;
-                                                        responseData.message = "用户信息修改完成";
-                                                        res.json(responseData);
-                                                    } else {
-                                                        throw err;
-                                                    }
-                                                }
-                                            );
-                                        } else {
-                                            throw err;
-                                        }
-                                    }
-                                );
-                            }
-                        }
-                    }
-                );
-            } else {
-                // 若不存在
-                responseData.code = 2;
-                responseData.message = "该用户不存在！";
-                res.json(responseData);
-                return;
-            }
-        });
-    } else {
-        responseData.code = 2;
-        responseData.message = "用户未登录！";
-        return res.json(responseData);
-    }
-});
+// router.post("/verifiedinfo/edit", (req, res, next) => {
+//     if (req.isAuthenticated()) {
+//         // let s'chon'e = req.body.username || req.user.username;
+//         // let password = req.body.password || req.user.password;
+//         // let phonenumber = req.body.phonenumber || req.user.phonenumber;
+//         // let firstname = req.body.firstname || req.user.firstname;
+//         // let lastname = req.body.lastname || req.user.lastname;
+//         // let email = req.body.email || req.user.email;
+//         userspaceModel.findOne({ user: req.user._id }).populate(["user"]).then(userspace => {
+//             if (userspace) {
+//                 if (username === "admin" && req.user.username != "admin") {
+//                     responseData.code = 2;
+//                     responseData.message = "不能直接修改超级管理员用户!";
+//                     res.json(responseData);
+//                     return;
+//                 }
+//                 let role = req.user.role || userspace.role;
+//                 let school = req.body.school || userspace.school;
+//                 let department = req.body.department || userspace.department;
+//                 let institute = req.body.institute || userspace.institute;
+//                 // 数据没有变更
+//                 if (username === userspace.user.username && password === userspace.user.password && phonenumber === userspace.user.phonenumber && firstname === userspace.user.firstname && lastname === userspace.user.lastname && email === userspace.user.email && gender === userspace.gender && motto === userspace.motto && description === userspace.description && realname === userspace.realname) {
+//                     responseData.code = 2;
+//                     responseData.message = "未修改任何数据！";
+//                     res.json(responseData);
+//                     return;
+//                 }
+//                 // 查询用户是否与数据库中的冲突
+//                 userModel.findOne(
+//                     {
+//                         _id: { $ne: userspace.user },
+//                         username: username
+//                     },
+//                     (err, docs) => {
+//                         if (docs) {
+//                             // 数据冲突
+//                             responseData.code = 2;
+//                             responseData.message = "该用户已存在！";
+//                             res.json(responseData);
+//                             return;
+//                         } else {
+//                             // 后端进行简单的验证
+//                             if (username === "") {
+//                                 // 如果标题为空，渲染错误页面
+//                                 responseData.code = 2;
+//                                 responseData.message = "用户名不能为空!";
+//                                 res.json(responseData);
+//                                 return;
+//                             } else if (password === "") {
+//                                 // 如果简介为空，渲染错误页面
+//                                 responseData.code = 2;
+//                                 responseData.message = "密码不能为空!";
+//                                 res.json(responseData);
+//                                 return;
+//                             } else if (
+//                                 username === "admin" &&
+//                                 req.user.username != "admin"
+//                             ) {
+//                                 responseData.code = 2;
+//                                 responseData.message =
+//                                     "不能直接修改超级管理员用户!";
+//                                 res.json(responseData);
+//                                 return;
+//                             } else {
+//                                 userModel.update(
+//                                     {
+//                                         _id: userspace.user
+//                                     },
+//                                     {
+//                                         username: username,
+//                                         password: password,
+//                                         email: email,
+//                                         phonenumber: phonenumber,
+//                                         firstname: firstname,
+//                                         lastname: lastname
+//                                     },
+//                                     err => {
+//                                         if (!err) {
+//                                             if (
+//                                                 req.user.username !=
+//                                                 userspace.user.username
+//                                             ) {
+//                                                 req.logout();
+//                                                 responseData.message =
+//                                                     "修改用户核心信息，退出登录";
+//                                             }
+//                                             userspaceModel.update(
+//                                                 {
+//                                                     user: userspace.user
+//                                                 },
+//                                                 {
+//                                                     gender: gender,
+//                                                     motto: motto,
+//                                                     description: description,
+//                                                     realname: realname
+//                                                 },
+//                                                 err => {
+//                                                     if (!err) {
+//                                                         responseData.code = 0;
+//                                                         responseData.message = "用户信息修改完成";
+//                                                         res.json(responseData);
+//                                                     } else {
+//                                                         throw err;
+//                                                     }
+//                                                 }
+//                                             );
+//                                         } else {
+//                                             throw err;
+//                                         }
+//                                     }
+//                                 );
+//                             }
+//                         }
+//                     }
+//                 );
+//             } else {
+//                 // 若不存在
+//                 responseData.code = 2;
+//                 responseData.message = "该用户不存在！";
+//                 res.json(responseData);
+//                 return;
+//             }
+//         });
+//     } else {
+//         responseData.code = 2;
+//         responseData.message = "用户未登录！";
+//         return res.json(responseData);
+//     }
+// });
 
 
+
+ 
 
 // 内容添加的保存
 router.post("/content/add", (req, res, next) => {
@@ -668,6 +676,49 @@ router.post("/comment/post", (req, res) => {
         }
     });
 });
+
+
+
+// 文件上传与删除
+const storageActivity = multer.diskStorage({
+    destination: function (req, file, cb) {
+        let year = moment().get('year')
+        let month = moment().get('month') + 1
+        let day = moment().get('date')
+        let filePath = path.resolve(__dirname, `../../public/imgs/files/${year}/${month}/${day}`)
+
+        fse.ensureDir(filePath, function () {
+            cb(null, filePath)
+        })
+    },
+    filename: function (req, file, cb) {
+        let name = utils.randomWord(false, 12)
+        if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/jpg') {
+            name = name + '.jpg'
+        } else if (file.mimetype === 'image/png') {
+            name = name + '.png'
+        }
+        cb(null, name)
+    }
+})
+const uploadActivity = multer({ storage: storageActivity })
+// // todo:需要加入权限验证才能进行上传／删除文件
+
+router.use((req, res, next) => {
+    if (req.user) {
+        next();
+    } else {
+        res.tools.setJson(200, 1, "您没有登陆！");
+    }
+});
+
+router.post('/file/upload/:op',
+    uploadActivity.single('file'),
+    ctrlFiles.fileCreate
+)
+router.delete('/file/*?',
+    ctrlFiles.fileDeleteOne
+)
 
 
 module.exports = router;
