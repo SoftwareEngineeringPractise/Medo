@@ -3,12 +3,43 @@ const marked = require("marked");
 const pagination = require("../modules/pagination");
 const passport = require("passport");
 const followModel = require("../models/follow");
+const verificationModel = require("../models/verification");
+const File = require("../models/file");
 const emailModel = require("../models/emailvalidation");
 const userModel = require("../models/user");
 const contentModel = require("../models/content");
 const categoryModel = require("../models/category");
 const router = express.Router();
+const path = require("path");
+const fse = require("fs-extra");
+const utils = require("../utils/utils");
+const multer = require("multer");
+const moment = require("moment");
+// 文件上传与删除
 
+
+const storageActivity = multer.diskStorage({
+  destination: function (req, file, cb) {
+    let year = moment().get('year')
+    let month = moment().get('month') + 1
+    let day = moment().get('date')
+    let filePath = path.resolve(__dirname, `../public/imgs/files/${year}/${month}/${day}`)
+
+    fse.ensureDir(filePath, function () {
+      cb(null, filePath)
+    })
+  },
+  filename: function (req, file, cb) {
+    let name = utils.randomWord(false, 12)
+    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/jpg') {
+      name = name + '.jpg'
+    } else if (file.mimetype === 'image/png') {
+      name = name + '.png'
+    }
+    cb(null, name)
+  }
+})
+const uploadActivity = multer({ storage: storageActivity })
 
 // Markdown Support
 marked.setOptions({
@@ -67,32 +98,46 @@ router.get("/verification", (req, res) => {
   }
 });
 
-router.post("/verification", (req, res) => {
-  if (req.user) {
-    userModel
-      .findById(req.user, {
-        // 去除保密字段
-        password: 0,
-        salt: 0,
-        hash: 0
-      })
-      .populate(["userInfo"])
-      .then(docs => {
-        if (!docs) {
-          res.render("main/error", { message: "没有该用户！" });
+router.post("/verification", uploadActivity.single("file"), function (req, res) {
+  if (req.file) {
+    let name = ''
+    if (req.body.fileName !== undefined) {
+      name = req.body.fileName
+    }
+    let path = req.file.path;
+    // 所有文件都保存在public目录下面
+    path = path.replace(/\\/g, "/");
+    let url = path.substring(path.indexOf('public') - 1);
+    const newverification = new verificationModel(); 
+    File.create(
+      {
+        name: name,
+        size: req.file.size,
+        type: req.file.mimetype,
+        path: path,
+        url: url
+      },
+      function(err, newfile) {
+        if (err) {
+          return res.tools.setJson(400, 1, err);
         } else {
-          res.render("main/useredit", {
-            message: "返回我的信息",
-            code: code,
-            docs: docs
+          newverification.verifyUrl = url;
+          newverification.userId = req.user._id;
+          newverification.school = req.body.school;
+          newverification.department = req.body.department;
+          newverification.institute = req.body.institute;
+          newverification.role = req.body.role;
+          newverification.save();
+          res.set("refresh", "3;url=/user/me");
+          return res.render("main/redirect", {
+            success: true,
+            msg: "认证信息提交成功！",
+            target: "个人信息界面",
+            targeturl: "/user/me"
           });
         }
-      })
-      .catch(err => {
-        res.render("main/error", { message: err });
-      });
-  } else {
-    return res.render("main/error", { message: "用户未登录！" });
+      }
+    );
   }
 });
 
@@ -126,7 +171,7 @@ router.post("/users/login", function (req, res, next) {
       if (loginErr) {
         return next(loginErr);
       }
-      if (req.body.referer && (req.body.referer !== undefined && req.body.referer.slice(-6) !== "/login")) {
+      if (req.body.referer && (req.body.referer !== undefined && req.body.referer.slice(-6) !== "/login" && req.body.referer.indexOf("EmailValidation")==req.body.referer.length)) {
         res.redirect(req.body.referer);
       } else {
         res.redirect("/");
@@ -158,20 +203,25 @@ router.get("/emailvalidation", function(req, res, next){
   let code = req.query.v;
   emailModel.findOneAndDelete({code:code}, (err, emailval)=>{
     if(err){
-      return res.render("main/emailval", { success: false, msg: err});
+      return res.render("main/redirect", { success: false, msg: err});
     }
     if(!emailval){
-      return res.render("main/emailval", {success:false, msg: "该链接不存在或已经失效！"});
+      return res.render("main/redirect", {success:false, msg: "该链接不存在或已经失效！"});
     }
     let id = emailval.userId;
     userModel.findById(id, (err, user)=>{
       if(err){
-        return res.render("main/emailval", { success: false, msg:err});
+        return res.render("main/redirect", { success: false, msg:err});
       }
       user.status = 1;
       user.save();
-      res.set("refresh", "5;url=/users/login");
-      return res.render("main/emailval", { success: true, msg: "邮箱认证成功！"});
+      res.set("refresh", "3;url=/users/login");
+      return res.render("main/redirect", {
+        success: true,
+        msg: "邮箱认证成功！",
+        target: "登录界面",
+        targeturl: "/users/login"
+      });
     });
     
   })
@@ -273,6 +323,10 @@ router.get("/useredit/:user", (req, res) => {
 }
 );
 
+
+router.get("/settings", (req, res)=>{
+  res.send("Null");
+})
 
 router.get("/content/:username", (req, res)=>{
   let name = req.params.username;

@@ -13,7 +13,12 @@ const pagination = object => {
 
     
     object.model
-      .find(object.where)
+      .find(object.where, {
+        // 去除保密字段
+        password: 0,
+        salt: 0,
+        hash: 0
+      })
       .sort({ '_id': -1 })
       .populate(populate)
       .skip(skip)

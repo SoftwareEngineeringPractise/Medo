@@ -28,9 +28,9 @@
                             <a href="/views?contentId=<%=docs[i]._id%>" class="btn btn-info">阅读全文</a>
                             <span class="text-info pull-right">阅读量：
                                 <%=docs[i].views%> | 时间：
-                                <%=docs[i].addTime%> | 作者:
-                                <%=docs[i].author.username%> | 分类:
-                                <%=docs[i].category.name%></span>
+                                <%=docs[i].addTime%> | 作者:<a href="/user/<%=docs[i].author._id%>"><%=docs[i].author.username%></a>
+                                 | 分类:
+                                <a href="/category/<%=docs[i].category.name%>"><%=docs[i].category.name%></a></span>
                         </div>
                         <% } %>
                         <%- include("../pagination") %>

@@ -71,7 +71,6 @@ passport.use(
         const newUserInfo = new userinfoModel();
         const newemailModel = new emailModel();
         newUser.username = username;
-		newUser.verified = true;
         newUser.password = password;
         newUser.setPassword(password)
         newUser.email = req.body.email;
