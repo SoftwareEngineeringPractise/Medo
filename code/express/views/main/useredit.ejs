@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include("../include")%>
+    <title>Medo</title>
+    <script src="/public/js/user.js"></script>
+</head>
+
+<body background="/public/imgs/material-grey-light-4k.jpg">
+    <div class="wrap">
+        <div class="main">
+            <%- include("nav")%>
+    <main role="main" class="App-main">
+        <div class="ProfileEdit">
+            <div class="Card">
+                <div class="ProfileHeader-header">
+                    <div class="UserCoverEditor">
+                        <div><label class="UploadPicture-wrapper"><input type="file" accept="image/png,image/jpeg" class="UploadPicture-input"><button
+                                    type="button" class="Button UserCoverEditor-simpleEditButton DynamicColorButton DynamicColorButton--dark"><svg
+                                        viewBox="0 0 20 16" class="Icon Icon--camera Icon--left" style="height: 16px; width: 14px;"
+                                        width="14" height="16" aria-hidden="true">
+                                        <title></title>
+                                        <g>
+                                            <path d="M18.094 2H15s-1-2-2-2H7C6 0 5 2 5 2H2C0 2 0 3.967 0 3.967V14c0 2 2.036 2 2.036 2H17c3 0 3-1.983 3-1.983V4c0-2-1.906-2-1.906-2zM10 12c-1.933 0-3.5-1.567-3.5-3.5S8.067 5 10 5s3.5 1.567 3.5 3.5S11.933 12 10 12zm0 1.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm7.5-8c-.552 0-1-.448-1-1s.448-1 1-1 1 .448 1 1-.448 1-1 1z"
+                                                fill-rule="evenodd"></path>
+                                        </g>
+                                    </svg>编辑封面图片</button></label>
+                            <div class="UserCover"><img class="UserCover-image" src="https://pic1.zhimg.com/80/v2-8214c520a5e89b4e2aa3f99667467738_r.jpg"
+                                    alt="用户封面"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ProfileHeader-main">
+                    <div>
+                        <div class="UserAvatarEditor ProfileHeader-avatar">
+                            <div class="UserAvatar"><img class="Avatar Avatar--large UserAvatar-inner" src="https://pic2.zhimg.com/v2-58787af077a86a8790140493855b5e45_xl.jpg"
+                                    srcset="https://pic2.zhimg.com/v2-58787af077a86a8790140493855b5e45_xll.jpg 2x" width="160"
+                                    height="160"></div><label class="UploadPicture-wrapper"><input type="file" accept="image/png,image/jpeg"
+                                    class="UploadPicture-input">
+                                <div class="Mask UserAvatarEditor-mask">
+                                    <div class="Mask-mask Mask-mask--black UserAvatarEditor-maskInner"></div>
+                                    <div class="Mask-content"><svg class="Zi Zi--Camera UserAvatarEditor-cameraIcon" fill="currentColor"
+                                            viewBox="0 0 24 24" width="36" height="36">
+                                            <path d="M20.094 6S22 6 22 8v10.017S22 20 19 20H4.036S2 20 2 18V7.967S2 6 4 6h3s1-2 2-2h6c1 0 2 2 2 2h3.094zM12 16a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7zm0 1.5a5 5 0 1 0-.001-10.001A5 5 0 0 0 12 17.5zm7.5-8a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"
+                                                fill-rule="evenodd"></path>
+                                        </svg>
+                                        <div class="UserAvatarEditor-maskInnerText">修改我的头像</div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="ProfileHeader-content">
+                        <div class="ProfileHeader-contentHead">
+                            <h1 class="ProfileHeader-title">
+                                <div class="FullnameField-editable"><span class="FullnameField-name">Peterial</span><button
+                                        type="button" class="Button ModifyButton Field-modify Field-modify-hidden Button--link"><svg
+                                            viewBox="0 0 12 12" class="Icon ModifyButton-icon Icon--modify" style="height: 16px; width: 12px;"
+                                            width="12" height="16" aria-hidden="true">
+                                            <title></title>
+                                            <g>
+                                                <path d="M.423 10.32L0 12l1.667-.474 1.55-.44-2.4-2.33-.394 1.564zM10.153.233c-.327-.318-.85-.31-1.17.018l-.793.817 2.49 2.414.792-.814c.318-.328.312-.852-.017-1.17l-1.3-1.263zM3.84 10.536L1.35 8.122l6.265-6.46 2.49 2.414-6.265 6.46z"
+                                                    fill-rule="evenodd"></path>
+                                            </g>
+                                        </svg>修改</button></div>
+                            </h1>
+                            <div class="ProfileHeader-expandActions ProfileEdit-expandActions"><a type="button" class="Button Button--plain"
+                                    href="/people/Peterial">返回我的主页<svg viewBox="0 0 10 6" class="Icon ProfileEdit-arrowIcon Icon--arrow"
+                                        style="height: 16px; width: 10px;" width="10" height="16" aria-hidden="true">
+                                        <title></title>
+                                        <g>
+                                            <path d="M8.716.217L5.002 4 1.285.218C.99-.072.514-.072.22.218c-.294.29-.294.76 0 1.052l4.25 4.512c.292.29.77.29 1.063 0L9.78 1.27c.293-.29.293-.76 0-1.052-.295-.29-.77-.29-1.063 0z"></path>
+                                        </g>
+                                    </svg></a></div>
+                        </div>
+                        <div class="ProfileEdit-fields">
+                            <form class="Field">
+                                <h3 class="Field-label">性别</h3>
+                                <div class="Field-content">
+                                    <div><span class="Field-text">男</span><button type="button" class="Button ModifyButton Field-modify Button--link"><svg
+                                                viewBox="0 0 12 12" class="Icon ModifyButton-icon Icon--modify" style="height: 16px; width: 12px;"
+                                                width="12" height="16" aria-hidden="true">
+                                                <title></title>
+                                                <g>
+                                                    <path d="M.423 10.32L0 12l1.667-.474 1.55-.44-2.4-2.33-.394 1.564zM10.153.233c-.327-.318-.85-.31-1.17.018l-.793.817 2.49 2.414.792-.814c.318-.328.312-.852-.017-1.17l-1.3-1.263zM3.84 10.536L1.35 8.122l6.265-6.46 2.49 2.414-6.265 6.46z"
+                                                        fill-rule="evenodd"></path>
+                                                </g>
+                                            </svg>修改</button></div>
+                                </div>
+                            </form>
+                            <form class="Field">
+                                <h3 class="Field-label">一句话介绍</h3>
+                                <div class="Field-content">
+                                    <div><span class="Field-text"><span class="RichText ztext">None</span></span><button
+                                            type="button" class="Button ModifyButton Field-modify Field-modify-hidden Button--link"><svg
+                                                viewBox="0 0 12 12" class="Icon ModifyButton-icon Icon--modify" style="height: 16px; width: 12px;"
+                                                width="12" height="16" aria-hidden="true">
+                                                <title></title>
+                                                <g>
+                                                    <path d="M.423 10.32L0 12l1.667-.474 1.55-.44-2.4-2.33-.394 1.564zM10.153.233c-.327-.318-.85-.31-1.17.018l-.793.817 2.49 2.414.792-.814c.318-.328.312-.852-.017-1.17l-1.3-1.263zM3.84 10.536L1.35 8.122l6.265-6.46 2.49 2.414-6.265 6.46z"
+                                                        fill-rule="evenodd"></path>
+                                                </g>
+                                            </svg>修改</button></div>
+                                </div>
+                            </form>
+                            <form class="Field">
+                                <h3 class="Field-label">居住地</h3>
+                                <div class="Field-content">
+                                    <div class="AddButton"><button type="button" class="Button Button--link"><svg viewBox="0 0 18 18"
+                                                class="Icon AddButton-icon Icon--add Icon--left" style="height: 20px; width: 20px;"
+                                                width="20" height="20" aria-hidden="true">
+                                                <title></title>
+                                                <g>
+                                                    <g fill-rule="evenodd">
+                                                        <path d="M6.035 16.433c-.875-.35-1.678-.848-2.383-1.482-.205-.184-.52-.167-.707.04-.185.204-.167.52.038.705.794.714 1.696 1.274 2.682 1.668.06.023.123.035.185.035.198 0 .386-.12.464-.314.103-.258-.022-.55-.28-.65zM1.097 10.247C1.054 9.975.8 9.79.525 9.83c-.273.043-.46.3-.417.57.154.98.467 1.925.93 2.803.09.17.264.267.443.267.08 0 .16-.02.234-.058.244-.13.338-.432.208-.676-.41-.78-.69-1.618-.825-2.49zM9.106 1c.95.014 1.878.19 2.76.528.058.022.118.033.178.033.2 0 .39-.12.467-.32.1-.258-.03-.547-.287-.646C11.233.214 10.19.014 9.12 0h-.007c-.273 0-.496.22-.5.493-.003.278.218.504.493.508zM3.73 2.83c.108 0 .218-.034.31-.107.693-.55 1.465-.976 2.295-1.27.26-.09.397-.377.305-.637C6.548.556 6.263.42 6.002.51 5.068.84 4.2 1.323 3.42 1.94c-.217.17-.254.485-.083.702.1.124.245.19.393.19zM2.01 4.136c-.236-.144-.544-.07-.688.165-.557.91-.945 1.9-1.15 2.944-.055.27.12.534.392.587.033.008.065.01.098.01.234 0 .443-.164.49-.402.184-.927.528-1.807 1.023-2.614.144-.236.07-.543-.165-.688zM14.927 2.228c-.207-.183-.523-.162-.705.047-.182.208-.16.523.047.706.664.583 1.224 1.265 1.665 2.028.092.16.26.25.433.25.085 0 .17-.02.25-.067.24-.137.32-.443.183-.682-.495-.86-1.125-1.626-1.873-2.28zM17.294 7.07c-.27.047-.454.306-.408.578.076.44.114.896.114 1.35 0 .493-.046.984-.133 1.46-.05.27.13.532.402.582.03.005.06.008.09.008.236 0 .446-.17.49-.41.1-.534.148-1.085.15-1.638 0-.513-.044-1.025-.13-1.52-.045-.273-.303-.457-.576-.41zM16.566 12.91c-.235-.14-.544-.065-.686.174-.452.76-1.02 1.434-1.692 2.005-.21.18-.235.494-.057.704.1.116.24.176.382.176.115 0 .23-.04.324-.12.754-.643 1.395-1.4 1.903-2.254.142-.238.064-.544-.174-.686zM11.766 16.51c-.884.325-1.814.49-2.772.49l-.208-.002c-.283-.02-.505.21-.513.487-.007.275.21.506.487.513L9 18c1.07 0 2.116-.186 3.11-.553.26-.095.393-.383.297-.642-.095-.26-.385-.392-.64-.295zM9.8 8.2V6.3c0-.442-.358-.8-.8-.8-.442 0-.8.358-.8.8v1.9H6.3c-.442 0-.8.358-.8.8 0 .442.358.8.8.8h1.9v1.9c0 .442.358.8.8.8.442 0 .8-.358.8-.8V9.8h1.9c.442 0 .8-.358.8-.8 0-.442-.358-.8-.8-.8H9.8z"></path>
+                                                    </g>
+                                                </g>
+                                            </svg>添加居住地</button></div>
+                                </div>
+                            </form>
+                            <form class="Field">
+                                <h3 class="Field-label">所在行业</h3>
+                                <div class="Field-content">
+                                    <div><button type="button" class="Button ModifyButton Button--link"><svg viewBox="0 0 12 12"
+                                                class="Icon ModifyButton-icon Icon--modify" style="height: 16px; width: 12px;"
+                                                width="12" height="16" aria-hidden="true">
+                                                <title></title>
+                                                <g>
+                                                    <path d="M.423 10.32L0 12l1.667-.474 1.55-.44-2.4-2.33-.394 1.564zM10.153.233c-.327-.318-.85-.31-1.17.018l-.793.817 2.49 2.414.792-.814c.318-.328.312-.852-.017-1.17l-1.3-1.263zM3.84 10.536L1.35 8.122l6.265-6.46 2.49 2.414-6.265 6.46z"
+                                                        fill-rule="evenodd"></path>
+                                                </g>
+                                            </svg>请填写行业信息</button></div>
+                                </div>
+                            </form>
+                            <form class="Field">
+                                <h3 class="Field-label">职业经历</h3>
+                                <div class="Field-content">
+                                    <div class="AddButton"><button type="button" class="Button Button--link"><svg viewBox="0 0 18 18"
+                                                class="Icon AddButton-icon Icon--add Icon--left" style="height: 20px; width: 20px;"
+                                                width="20" height="20" aria-hidden="true">
+                                                <title></title>
+                                                <g>
+                                                    <g fill-rule="evenodd">
+                                                        <path d="M6.035 16.433c-.875-.35-1.678-.848-2.383-1.482-.205-.184-.52-.167-.707.04-.185.204-.167.52.038.705.794.714 1.696 1.274 2.682 1.668.06.023.123.035.185.035.198 0 .386-.12.464-.314.103-.258-.022-.55-.28-.65zM1.097 10.247C1.054 9.975.8 9.79.525 9.83c-.273.043-.46.3-.417.57.154.98.467 1.925.93 2.803.09.17.264.267.443.267.08 0 .16-.02.234-.058.244-.13.338-.432.208-.676-.41-.78-.69-1.618-.825-2.49zM9.106 1c.95.014 1.878.19 2.76.528.058.022.118.033.178.033.2 0 .39-.12.467-.32.1-.258-.03-.547-.287-.646C11.233.214 10.19.014 9.12 0h-.007c-.273 0-.496.22-.5.493-.003.278.218.504.493.508zM3.73 2.83c.108 0 .218-.034.31-.107.693-.55 1.465-.976 2.295-1.27.26-.09.397-.377.305-.637C6.548.556 6.263.42 6.002.51 5.068.84 4.2 1.323 3.42 1.94c-.217.17-.254.485-.083.702.1.124.245.19.393.19zM2.01 4.136c-.236-.144-.544-.07-.688.165-.557.91-.945 1.9-1.15 2.944-.055.27.12.534.392.587.033.008.065.01.098.01.234 0 .443-.164.49-.402.184-.927.528-1.807 1.023-2.614.144-.236.07-.543-.165-.688zM14.927 2.228c-.207-.183-.523-.162-.705.047-.182.208-.16.523.047.706.664.583 1.224 1.265 1.665 2.028.092.16.26.25.433.25.085 0 .17-.02.25-.067.24-.137.32-.443.183-.682-.495-.86-1.125-1.626-1.873-2.28zM17.294 7.07c-.27.047-.454.306-.408.578.076.44.114.896.114 1.35 0 .493-.046.984-.133 1.46-.05.27.13.532.402.582.03.005.06.008.09.008.236 0 .446-.17.49-.41.1-.534.148-1.085.15-1.638 0-.513-.044-1.025-.13-1.52-.045-.273-.303-.457-.576-.41zM16.566 12.91c-.235-.14-.544-.065-.686.174-.452.76-1.02 1.434-1.692 2.005-.21.18-.235.494-.057.704.1.116.24.176.382.176.115 0 .23-.04.324-.12.754-.643 1.395-1.4 1.903-2.254.142-.238.064-.544-.174-.686zM11.766 16.51c-.884.325-1.814.49-2.772.49l-.208-.002c-.283-.02-.505.21-.513.487-.007.275.21.506.487.513L9 18c1.07 0 2.116-.186 3.11-.553.26-.095.393-.383.297-.642-.095-.26-.385-.392-.64-.295zM9.8 8.2V6.3c0-.442-.358-.8-.8-.8-.442 0-.8.358-.8.8v1.9H6.3c-.442 0-.8.358-.8.8 0 .442.358.8.8.8h1.9v1.9c0 .442.358.8.8.8.442 0 .8-.358.8-.8V9.8h1.9c.442 0 .8-.358.8-.8 0-.442-.358-.8-.8-.8H9.8z"></path>
+                                                    </g>
+                                                </g>
+                                            </svg>添加职业经历</button></div>
+                                </div>
+                            </form>
+                            <form class="Field Field-education">
+                                <h3 class="Field-label">教育经历</h3>
+                                <div class="Field-content">
+                                    <div class="AddButton"><button type="button" class="Button Button--link"><svg viewBox="0 0 18 18"
+                                                class="Icon AddButton-icon Icon--add Icon--left" style="height: 20px; width: 20px;"
+                                                width="20" height="20" aria-hidden="true">
+                                                <title></title>
+                                                <g>
+                                                    <g fill-rule="evenodd">
+                                                        <path d="M6.035 16.433c-.875-.35-1.678-.848-2.383-1.482-.205-.184-.52-.167-.707.04-.185.204-.167.52.038.705.794.714 1.696 1.274 2.682 1.668.06.023.123.035.185.035.198 0 .386-.12.464-.314.103-.258-.022-.55-.28-.65zM1.097 10.247C1.054 9.975.8 9.79.525 9.83c-.273.043-.46.3-.417.57.154.98.467 1.925.93 2.803.09.17.264.267.443.267.08 0 .16-.02.234-.058.244-.13.338-.432.208-.676-.41-.78-.69-1.618-.825-2.49zM9.106 1c.95.014 1.878.19 2.76.528.058.022.118.033.178.033.2 0 .39-.12.467-.32.1-.258-.03-.547-.287-.646C11.233.214 10.19.014 9.12 0h-.007c-.273 0-.496.22-.5.493-.003.278.218.504.493.508zM3.73 2.83c.108 0 .218-.034.31-.107.693-.55 1.465-.976 2.295-1.27.26-.09.397-.377.305-.637C6.548.556 6.263.42 6.002.51 5.068.84 4.2 1.323 3.42 1.94c-.217.17-.254.485-.083.702.1.124.245.19.393.19zM2.01 4.136c-.236-.144-.544-.07-.688.165-.557.91-.945 1.9-1.15 2.944-.055.27.12.534.392.587.033.008.065.01.098.01.234 0 .443-.164.49-.402.184-.927.528-1.807 1.023-2.614.144-.236.07-.543-.165-.688zM14.927 2.228c-.207-.183-.523-.162-.705.047-.182.208-.16.523.047.706.664.583 1.224 1.265 1.665 2.028.092.16.26.25.433.25.085 0 .17-.02.25-.067.24-.137.32-.443.183-.682-.495-.86-1.125-1.626-1.873-2.28zM17.294 7.07c-.27.047-.454.306-.408.578.076.44.114.896.114 1.35 0 .493-.046.984-.133 1.46-.05.27.13.532.402.582.03.005.06.008.09.008.236 0 .446-.17.49-.41.1-.534.148-1.085.15-1.638 0-.513-.044-1.025-.13-1.52-.045-.273-.303-.457-.576-.41zM16.566 12.91c-.235-.14-.544-.065-.686.174-.452.76-1.02 1.434-1.692 2.005-.21.18-.235.494-.057.704.1.116.24.176.382.176.115 0 .23-.04.324-.12.754-.643 1.395-1.4 1.903-2.254.142-.238.064-.544-.174-.686zM11.766 16.51c-.884.325-1.814.49-2.772.49l-.208-.002c-.283-.02-.505.21-.513.487-.007.275.21.506.487.513L9 18c1.07 0 2.116-.186 3.11-.553.26-.095.393-.383.297-.642-.095-.26-.385-.392-.64-.295zM9.8 8.2V6.3c0-.442-.358-.8-.8-.8-.442 0-.8.358-.8.8v1.9H6.3c-.442 0-.8.358-.8.8 0 .442.358.8.8.8h1.9v1.9c0 .442.358.8.8.8.442 0 .8-.358.8-.8V9.8h1.9c.442 0 .8-.358.8-.8 0-.442-.358-.8-.8-.8H9.8z"></path>
+                                                    </g>
+                                                </g>
+                                            </svg>添加教育经历</button></div>
+                                    <div class="Field-list"></div>
+                                </div>
+                            </form>
+                            <form class="Field">
+                                <h3 class="Field-label">
+                                    <div class="PersonalVerificationField-label">个人认证<div class="PersonalVerificationField-helpIcon"><span
+                                                style="display: inline-flex; align-items: center;">​<svg class="Zi Zi--Help"
+                                                    fill="currentColor" viewBox="0 0 24 24" width="18" height="18">
+                                                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm0-3.681a1.17 1.17 0 0 1-.846-.344 1.143 1.143 0 0 1-.354-.856c0-.328.118-.61.354-.847.236-.235.518-.353.846-.353.328 0 .61.115.846.344.236.23.354.515.354.856 0 .342-.118.626-.354.856-.236.229-.518.344-.846.344zm2.761-7.398c-.228.232-.637.621-1.227 1.17-.163.154-.295.29-.393.407a1.643 1.643 0 0 0-.22.32 1.614 1.614 0 0 0-.111.293c-.026.097-.066.267-.119.512-.09.518-.377.777-.857.777a.86.86 0 0 1-.63-.254c-.17-.17-.255-.421-.255-.755 0-.419.062-.78.187-1.087.125-.307.29-.576.497-.808.206-.231.485-.506.835-.825.307-.28.53-.49.666-.632.137-.142.252-.3.346-.474.093-.175.14-.364.14-.568 0-.399-.143-.735-.428-1.01-.286-.273-.655-.41-1.106-.41-.528 0-.917.138-1.166.414-.25.277-.46.684-.634 1.222-.163.563-.472.845-.928.845a.896.896 0 0 1-.68-.295c-.185-.197-.278-.41-.278-.64 0-.473.147-.952.44-1.438.292-.486.72-.888 1.28-1.207C10.683 6.16 11.339 6 12.087 6c.696 0 1.31.133 1.844.4a3.02 3.02 0 0 1 1.234 1.087c.291.459.436.957.436 1.495 0 .423-.083.794-.248 1.113a3.413 3.413 0 0 1-.59.826z"
+                                                        fill-rule="evenodd"></path>
+                                                </svg></span></div>
+                                    </div>
+                                </h3>
+                                <div class="Field-content">
+                                    <div><button type="button" class="Button Button--link"><a href="/account/verification/management"
+                                                rel="noopener noreferrer">申请个人认证<span style="display: inline-flex; align-items: center;">​<svg
+                                                        class="Zi Zi--ArrowRight" fill="currentColor" viewBox="0 0 24 24"
+                                                        width="24" height="24">
+                                                        <path d="M9.218 16.78a.737.737 0 0 0 1.052 0l4.512-4.249a.758.758 0 0 0 0-1.063L10.27 7.22a.737.737 0 0 0-1.052 0 .759.759 0 0 0-.001 1.063L13 12l-3.782 3.716a.758.758 0 0 0 0 1.063z"
+                                                            fill-rule="evenodd"></path>
+                                                    </svg></span></a></button></div>
+                                </div>
+                            </form>
+                            <form class="Field">
+                                <h3 class="Field-label">个人简介</h3>
+                                <div class="Field-content">
+                                    <div class="DescriptionField-content"><span class="Field-text"><span class="RichText ztext">C++/PS/Python初阶学习者</span></span><button
+                                            type="button" class="Button ModifyButton Field-modify Field-modify-hidden Button--link"><svg
+                                                viewBox="0 0 12 12" class="Icon ModifyButton-icon Icon--modify" style="height: 16px; width: 12px;"
+                                                width="12" height="16" aria-hidden="true">
+                                                <title></title>
+                                                <g>
+                                                    <path d="M.423 10.32L0 12l1.667-.474 1.55-.44-2.4-2.33-.394 1.564zM10.153.233c-.327-.318-.85-.31-1.17.018l-.793.817 2.49 2.414.792-.814c.318-.328.312-.852-.017-1.17l-1.3-1.263zM3.84 10.536L1.35 8.122l6.265-6.46 2.49 2.414-6.265 6.46z"
+                                                        fill-rule="evenodd"></path>
+                                                </g>
+                                            </svg>修改</button></div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+        </div>
+    
+    </div>
+    <%- include("footer")%>
+</body>
+<script>
+    var code = <%= code %>;
+    console.log(code);
+    if (code) {
+        if (code == 1) {
+            $("#EditProfile").removeClass("hide");
+        } else if (code == 2) {
+            $("#Follow").removeClass("hide");
+        } else {
+            $("#UnFollow").removeClass("hide");
+        }
+    }
+</script>
+
+</html>
