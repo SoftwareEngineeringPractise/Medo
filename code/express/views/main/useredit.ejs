@@ -16,8 +16,9 @@
             <div class="Card">
                 <div class="ProfileHeader-header">
                     <div class="UserCoverEditor">
-                        <div><label class="UploadPicture-wrapper"><input type="file" accept="image/png,image/jpeg" class="UploadPicture-input"><button
-                                    type="button" class="Button UserCoverEditor-simpleEditButton DynamicColorButton DynamicColorButton--dark"><svg
+                        <div><label class="UploadPicture-wrapper"><input type="file" name="file" id="xFile" url="/api/web/file/upload/bg"
+                                            bind-img="UserCover-image" onchange="upload(this);" accept="image/png,image/jpeg" class="hide UploadPicture-input">
+                            <button type="button" onclick="javaScript:$('#xFile').click();" class="Button UserCoverEditor-simpleEditButton DynamicColorButton DynamicColorButton--dark"><svg
                                         viewBox="0 0 20 16" class="Icon Icon--camera Icon--left" style="height: 16px; width: 14px;"
                                         width="14" height="16" aria-hidden="true">
                                         <title></title>
@@ -26,7 +27,7 @@
                                                 fill-rule="evenodd"></path>
                                         </g>
                                     </svg>编辑封面图片</button></label>
-                            <div class="UserCover"><img class="UserCover-image" src="https://pic1.zhimg.com/80/v2-8214c520a5e89b4e2aa3f99667467738_r.jpg"
+                            <div class="UserCover"><img id="UserCover-image" class="UserCover-image" src="<%= docs.bgUrl%>"
                                     alt="用户封面"></div>
                         </div>
                     </div>
@@ -34,10 +35,12 @@
                 <div class="ProfileHeader-main">
                     <div>
                         <div class="UserAvatarEditor ProfileHeader-avatar">
-                            <div class="UserAvatar"><img class="Avatar Avatar--large UserAvatar-inner" src="https://pic2.zhimg.com/v2-58787af077a86a8790140493855b5e45_xl.jpg"
-                                    srcset="https://pic2.zhimg.com/v2-58787af077a86a8790140493855b5e45_xll.jpg 2x" width="160"
-                                    height="160"></div><label class="UploadPicture-wrapper"><input type="file" accept="image/png,image/jpeg"
-                                    class="UploadPicture-input">
+                            <div class="UserAvatar"><img id="Avatar-image" onclick="javaScript:$('#yFile').click();" class="Avatar Avatar--large UserAvatar-inner" src="<%= docs.avatarUrl%>" width="160"
+                                    height="160"></div>
+                                    
+                                    <label class="UploadPicture-wrapper"><input type="file" name="file" id="yFile" url="/api/web/file/upload/avatar"
+                                                accept="image/png,image/jpeg" bind-img="Avatar-image" onchange="upload(this);"
+                                                class="hide UploadPicture-input">
                                 <div class="Mask UserAvatarEditor-mask">
                                     <div class="Mask-mask Mask-mask--black UserAvatarEditor-maskInner"></div>
                                     <div class="Mask-content"><svg class="Zi Zi--Camera UserAvatarEditor-cameraIcon" fill="currentColor"
@@ -54,7 +57,7 @@
                     <div class="ProfileHeader-content">
                         <div class="ProfileHeader-contentHead">
                             <h1 class="ProfileHeader-title">
-                                <div class="FullnameField-editable"><span class="FullnameField-name">Peterial</span><button
+                                <div class="FullnameField-editable"><span class="FullnameField-name"> <%= docs.username%></span><button
                                         type="button" class="Button ModifyButton Field-modify Field-modify-hidden Button--link"><svg
                                             viewBox="0 0 12 12" class="Icon ModifyButton-icon Icon--modify" style="height: 16px; width: 12px;"
                                             width="12" height="16" aria-hidden="true">
@@ -66,7 +69,7 @@
                                         </svg>修改</button></div>
                             </h1>
                             <div class="ProfileHeader-expandActions ProfileEdit-expandActions"><a type="button" class="Button Button--plain"
-                                    href="/people/Peterial">返回我的主页<svg viewBox="0 0 10 6" class="Icon ProfileEdit-arrowIcon Icon--arrow"
+                                    href="/user/me">返回我的主页<svg viewBox="0 0 10 6" class="Icon ProfileEdit-arrowIcon Icon--arrow"
                                         style="height: 16px; width: 10px;" width="10" height="16" aria-hidden="true">
                                         <title></title>
                                         <g>
@@ -92,7 +95,7 @@
                             <form class="Field">
                                 <h3 class="Field-label">一句话介绍</h3>
                                 <div class="Field-content">
-                                    <div><span class="Field-text"><span class="RichText ztext">None</span></span><button
+                                    <div><span class="Field-text"><span class="RichText ztext"><%= docs.motto%></span></span><button
                                             type="button" class="Button ModifyButton Field-modify Field-modify-hidden Button--link"><svg
                                                 viewBox="0 0 12 12" class="Icon ModifyButton-icon Icon--modify" style="height: 16px; width: 12px;"
                                                 width="12" height="16" aria-hidden="true">
@@ -175,7 +178,7 @@
                                     </div>
                                 </h3>
                                 <div class="Field-content">
-                                    <div><button type="button" class="Button Button--link"><a href="/account/verification/management"
+                                    <div><button type="button" class="Button Button--link"><a href="/verification"
                                                 rel="noopener noreferrer">申请个人认证<span style="display: inline-flex; align-items: center;">​<svg
                                                         class="Zi Zi--ArrowRight" fill="currentColor" viewBox="0 0 24 24"
                                                         width="24" height="24">

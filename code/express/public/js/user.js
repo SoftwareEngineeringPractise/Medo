@@ -130,7 +130,6 @@ $(document).ready(function () {
         $(this).html("已关注");
     });
     $("#EditProfile").on('click', function () {
-        window.location.href = "/useredit/me"
-        alert("查看资料");
+        window.location.href = "/useredit/me";
     });
 });
