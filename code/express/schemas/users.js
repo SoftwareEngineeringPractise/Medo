@@ -32,18 +32,18 @@ const weiXinSchema = new mongoose.Schema({
 
 module.exports = new mongoose.Schema({
   username: { type: String, default: "" },
-  password: { type: String, default: "" },
-  email: { type: String, default: "" },
-  avatarUrl: { type: String, default: "/public/imgs/avatar.jpg"},
+  password: { type: String, default: "", select: false },
+  email: { type: String, default: ""},
+  avatarUrl: { type: String, default: "/public/imgs/avatar.jpg" },
   bgUrl: { type: String, default: "/public/imgs/bg.jpg" },
   tel: { type: String, default: "" },
-  motto: { type: String, default:"知易行难"},
+  motto: { type: String, default: "知易行难" },
   hash: String,
   salt: String, // 加盐验证
   isadmin: { type: Boolean, default: false },
-  verified:{type:Boolean, default: false}, //是否经过身份认证
+  verified: { type: Boolean, default: false }, //是否经过身份认证
   status: { type: String, default: "0" }, // 0 - 未激活（不能使用tel／email + password进行登录；1 - 正常；2 - 禁用
-  weiXin: { type:weiXinSchema, default: null}, // 微信绑定信息
+  weiXin: { type: weiXinSchema, default: null }, // 微信绑定信息
   userInfo: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "userinfo",
@@ -55,5 +55,5 @@ module.exports = new mongoose.Schema({
     default: []
   },
   // 用户评价
-  comment:{ type: Array, default:[]} 
+  comment: { type: Array, default: [] }
 });;

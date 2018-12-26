@@ -18,7 +18,8 @@ function updateinfo() {
         $("#userinfo").addClass("dropdown"); 
         if (result.data.isadmin) {
           $("#usermgr").removeClass("hide");
-          $("#categorymgr").removeClass("hide");   
+          $("#categorymgr").removeClass("hide");
+          $("#verificationmgr").removeClass("hide");
         }
         if(result.data.verified){
           $("#console").removeClass("hide");

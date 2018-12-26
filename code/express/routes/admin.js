@@ -1,8 +1,12 @@
 var express = require("express");
 var userModel = require("../models/user");
+var userInfoModel = require("../models/userinfo");
 var categoryModel = require("../models/category")
 var contentModel = require("../models/content");
+var verificationModel = require("../models/verification");
 var router = express.Router();
+var File = require("../models/file");
+var fs = require("fs");
 var pagination = require("../modules/pagination");
 
 router.use((req, res, next) => {
@@ -495,26 +499,36 @@ router.get("/user/delete", (req, res, next) => {
     // 获取id
     let id = req.query.id;
     // 根据id删除数据
-    userModel.remove({
-        _id: id
-    }, (err) => {
-        if (!err) {
-            // 删除成功
-            res.set("refresh", "3;url=/admin/user");
-            res.render("admin/success", {
-                url: "/admin/user",
-                userinfo: req.userinfo,
-                message: "删除成功！"
-            });
-        } else {
-            // 出错
+    contentModel.remove({ author: id }, err1=>{
+        if(err1){
             res.render("admin/error", {
                 url: "/admin/user",
                 userinfo: req.userinfo,
                 message: "删除失败！"
             });
+        } else{
+            userModel.remove({
+                _id: id
+            }, (err) => {
+                if (!err) {
+                    res.set("refresh", "3;url=/admin/user");
+                    res.render("admin/success", {
+                        url: "/admin/user",
+                        userinfo: req.userinfo,
+                        message: "删除成功！"
+                    });
+                } else {
+                    // 出错
+                    res.render("admin/error", {
+                        url: "/admin/user",
+                        userinfo: req.userinfo,
+                        message: "删除失败！"
+                    });
+                }
+            });
         }
     });
+
 });
 
 
@@ -699,6 +713,147 @@ router.get("/category/delete", (req, res, next) => {
             });
         }
     });
+});
+
+
+router.get("/messages", (req, res, next) => {
+    let where = {};
+    if (!req.user.isadmin) {
+        where = { author: req.user._id };
+    }
+    pagination({
+        limit: 10,
+        // 需要操作的数据库模型
+        model: verificationModel,
+        // 需要控制分页的url
+        url: "/admin/messages",
+        // 渲染的模板页面
+        ejs: "admin/messages",
+        // 查询的条件
+        where: where,
+        // 需要跨集合查询的条件
+        populate: [{path: 'userId', select: '_id username'}],
+        res: res,
+        req: req
+    });
+});
+
+
+// 认证同意的界面
+router.get("/messages/approval", (req, res, next) => {
+    // 获取需要修改内容的id
+    let id = req.query.id;
+    let userId = req.query.userId;
+    // 从数据库中查询
+    verificationModel.findByIdAndDelete(
+      {
+        _id: id
+      },
+      (err, info) => {
+        if (!err) {
+          let role = info.role;
+          userModel.findById(userId, (err1, User) => {
+            if (err1) {
+              res.set("refresh", "3;url=/admin/content");
+              return res.render("admin/error", {
+                url: "/admin/messages",
+                userinfo: req.userinfo,
+                message: "操作失败！"
+              });
+            } else{
+                User.verified = true;
+                User.save();
+                userInfoModel.findOne({ userId: User._id }, (err2, cntuserInfo) => {
+                    if (err2) {
+                        res.render("admin/error", {
+                            url: "/admin/messages",
+                            userinfo: req.userinfo,
+                            message: "操作失败！"
+                        });
+                    }
+                    else {
+                        cntuserInfo.role = role;
+                        cntuserInfo.save();
+                        File.findOneAndRemove({ url: info.verifyUrl },
+                            (err1, imgfile) => {
+                                if (err1) {
+                                    res.render("admin/error", {
+                                        url: "/admin/messages",
+                                        userinfo: req.userinfo,
+                                        message: "操作失败！"
+                                    });
+                                } else {
+
+                                    fs.unlink(imgfile.path);
+                                    res.set("refresh", "3;url=/admin/messages");
+                                    res.render("admin/success", {
+                                        url: "/admin/messages",
+                                        userinfo: req.userinfo,
+                                        message: "同意申请！"
+                                    });
+                                }
+                            });
+                    }
+                })   
+            }
+          });
+        } else {
+          // 出错
+          res.set("refresh", "3;url=/admin/messages");
+          res.render("admin/error", {
+            url: "/admin/messages",
+            userinfo: req.userinfo,
+            message: "操作失败！"
+          });
+        }
+      }
+    );
+});
+
+
+
+// 认证的删除
+router.get("/messages/discard", (req, res, next) => {
+    // 获取id
+    let id = req.query.id;
+    let userId = req.query.userId;
+    // 根据id删除数据
+    verificationModel.findByIdAndRemove(
+      {
+        _id: id
+      },
+      (err, info) => {
+        if (!err) {
+            console.log(info)
+            File.findOneAndRemove({ url: info.verifyUrl },
+                (err1,imgfile) => {
+                    if (err1) {
+                        res.render("admin/error", {
+                            url: "/admin/messages",
+                            userinfo: req.userinfo,
+                            message: "操作失败！"
+                        });
+                    } else {
+                        fs.unlink(imgfile.path);
+                        res.set("refresh", "3;url=/admin/messages");
+                        res.render("admin/success", {
+                            url: "/admin/messages",
+                            userinfo: req.userinfo,
+                            message: "不同意申请！"
+                        });
+                    }
+                });
+        } else {
+                 // 出错
+                 // res.set("refresh", "3;url=/admin/messages");
+                 res.render("admin/error", {
+                   url: "/admin/messages",
+                   userinfo: req.userinfo,
+                   message: "操作失败！"
+                 });
+               }
+      }
+    );
 });
 
 

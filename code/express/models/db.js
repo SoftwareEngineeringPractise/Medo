@@ -60,4 +60,5 @@ require("./file");
 require("./follow")
 require("./favorite")
 require("./emailvalidation");
+require("./verification");
 

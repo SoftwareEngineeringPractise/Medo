@@ -27,9 +27,10 @@
                             <center>
                                 <%= msg %>
                             </center>
-                        <center><font id="num">5<font> </center>
+                        <center><font id="num">5</font><font>
+                            <%= target %>...<font></center>
                             <center>
-                                <a href="/users/login">直接跳转</a>
+                                <a href="<%= targeturl %>">直接跳转</a>
                             </center>
             <%} else{%>
             <center>
@@ -46,12 +47,12 @@
         if (num > 0) {
             num--;
             setTimeout(function () { recount(num); }, 1000);
-            $('#num').html(num+ 's后自动跳转到登录页面...');
+            $('#num').html(num+ 's后自动跳转到');
         } else {
             console.log("end");
         }
     }
-    recount(6);
+    recount(4);
 </script>
 
 </html>

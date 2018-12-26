@@ -17,22 +17,36 @@
                 </div>
 <div class="container-fluid">
 
-    <form method="post">
+    <form method="post" id="upload-form" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="title">角色</label>
+                            <select name="role" id="role" class="form-control">
+                                <option value="Student">
+                                    学生
+                                </option>
+                                <option value="Mentor">
+                                    导师
+                                </option>
+                                <option value="Lab">
+                                    实验室
+                                </option>
+                            </select>
+        </div>
         <div class="form-group">
             <label for="title">学校</label>
-            <input type="text" class="form-control" id="title" name="title" placeholder="请输入学校" value="<%=docs.userInfo.school%>">
+            <input type="text" class="form-control" id="title" name="school" placeholder="请输入学校" value="<%=docs.userInfo.school%>">
         </div>
         <div class="form-group">
             <label for="title">院系</label>
-            <input type="text" class="form-control" id="title" name="title" placeholder="请输入院系" value="<%=docs.userInfo.department%>">
+            <input type="text" class="form-control" id="title" name="department" placeholder="请输入院系" value="<%=docs.userInfo.department%>">
         </div>
         <div class="form-group">
             <label for="description">实验室</label>
-            <input type="text" class="form-control" id="description" name="description" placeholder="请输入实验室" value="<%=docs.userInfo.institute%>">
+            <input type="text" class="form-control" id="description" name="institute" placeholder="请输入实验室" value="<%=docs.userInfo.institute%>">
         </div>
         <div class="form-group">
             <label for="description">证件照</label>
-            <input type="file" class="form-control" id="description" name="description" placeholder="请输入证件照" value="<%=docs.userInfo.institute%>">
+            <input type="file" name="file" class="form-control" id="file" accept="image/png,image/jpeg">
         </div>
         <button type="submit" class="btn btn-primary">提交</button>
     </form>

@@ -129,7 +129,13 @@ $(document).ready(function () {
     }, function () {
         $(this).html("已关注");
     });
+
     $("#EditProfile").on('click', function () {
         window.location.href = "/useredit/me";
+    });
+
+    var form = $("#upload-form");
+    form.on('submit', function () {
+        alert("提交成功！");
     });
 });
