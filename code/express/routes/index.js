@@ -38,7 +38,63 @@ router.get("/", (req, res) => {
   });
 });
 
+router.get("/verification", (req, res) => {
+  if (req.user) {
+    userModel
+      .findById(req.user, {
+        // 去除保密字段
+        password: 0,
+        salt: 0,
+        hash: 0
+      })
+      .populate(["userInfo"])
+      .then(docs => {
+        if (!docs) {
+          res.render("main/error", { message: "没有该用户！" });
+        } else {
+          res.render("main/verification", {
+            message: "返回我的信息",
+            code: 1,
+            docs: docs
+          });
+        }
+      })
+      .catch(err => {
+        res.render("main/error", { message: err });
+      });
+  } else {
+    return res.render("main/error", { message: "用户未登录！" });
+  }
+});
 
+router.post("/verification", (req, res) => {
+  if (req.user) {
+    userModel
+      .findById(req.user, {
+        // 去除保密字段
+        password: 0,
+        salt: 0,
+        hash: 0
+      })
+      .populate(["userInfo"])
+      .then(docs => {
+        if (!docs) {
+          res.render("main/error", { message: "没有该用户！" });
+        } else {
+          res.render("main/useredit", {
+            message: "返回我的信息",
+            code: code,
+            docs: docs
+          });
+        }
+      })
+      .catch(err => {
+        res.render("main/error", { message: err });
+      });
+  } else {
+    return res.render("main/error", { message: "用户未登录！" });
+  }
+});
 
 // user log in
 router.get("/users/login", (req, res) => {
@@ -170,6 +226,7 @@ router.get("/user/:user", (req, res) => {
   }
 );
 
+
 router.get("/useredit/:user", (req, res) => {
   let userId = req.params.user;
   let code = 0;
@@ -215,7 +272,6 @@ router.get("/useredit/:user", (req, res) => {
     });
 }
 );
-
 
 
 router.get("/content/:username", (req, res)=>{
