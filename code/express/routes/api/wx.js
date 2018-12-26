@@ -201,9 +201,9 @@ router.get(
           hash: 0
         }
       )
-      .populate(['userinfo'])
+      .populate(['userInfo'])
       .then(docs => {
-        if (docs.role != "Lab") {
+        if (docs.userInfo.role != "Lab") {
           res.tools.setJson(404, 2, "没有该研究所！");
         } else if (!docs) {
           res.tools.setJson(404, 2, "没有该用户！");
@@ -382,7 +382,7 @@ router.post(
         err => {
           if (!err) {
             // 保存成功
-            res.tools.setJson(200, 1, "提交成功！");
+            res.tools.setJson(200, 0, "提交成功！");
           } else {
             throw err;
           }
@@ -689,7 +689,7 @@ router.get('/search/school/:q', (req, res, next) => {
       res.tools.setJson(404, 1, err);
     }
     if (docs) {
-      res.tools.setJson(200, 0, docs);
+      res.tools.setJson(200, 0, "返回学校搜索结果成功", docs);
     }
   });
 })
@@ -704,7 +704,7 @@ router.get('/search/department/:q', (req, res, next) => {
         res.tools.setJson(404, 1, err);
       }
       if (docs) {
-        res.tools.setJson(200, 0, docs);
+        res.tools.setJson(200, 0, "返回院系搜索结果成功", docs);
       }
     }
   );
