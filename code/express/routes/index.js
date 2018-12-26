@@ -2,6 +2,7 @@ const express = require("express");
 const marked = require("marked");
 const pagination = require("../modules/pagination");
 const passport = require("passport");
+const followModel = require("../models/follow");
 const emailModel = require("../models/emailvalidation");
 const userModel = require("../models/user");
 const contentModel = require("../models/content");
@@ -24,7 +25,7 @@ marked.setOptions({
 
 router.get("/", (req, res) => {
   pagination({
-    limit: 2,
+    limit: 10,
     model: contentModel,
     url: "/",
     ejs: "main/index",
@@ -123,13 +124,29 @@ router.get("/emailvalidation", function(req, res, next){
 
 
 
-router.get("/me", (req, res) => {
-  if (req.isAuthenticated() && req.user.status == 1) {
+router.get("/user/:user", (req, res) => {
+  let userId = req.params.user;
+  let code = 0;
+  if(req.user){
+    if (userId == 'me' || req.user._id == userId) {
+        userId = req.user._id;
+        code = 1;
+    } else{
+      followModel.findOne({ userId: req.user._id, followId: userId }, (err, result) => {
+        if (result) {
+          code = 3;
+        } else {
+          code = 2;
+        }
+      });
+    }
+  } else if(userId == 'me'){
+    return res.render("main/error", {message:"用户未登录！"});
+  }
     userModel.findById(
-      req.user._id,
+      userId,
       {
         // 去除保密字段
-        _id: 0,
         password: 0,
         salt: 0,
         hash: 0
@@ -140,43 +157,66 @@ router.get("/me", (req, res) => {
         if (!docs) {
           res.render("main/error", { message: "没有该用户！" });
         } else {
-          res.render("main/user", { message: "返回我的信息", docs: docs });
+          res.render("main/user", {
+            message: "返回我的信息",
+            code: code,
+            docs: docs
+          });
         }
       })
       .catch(err => {
         res.render("main/error", { message: err });
       });
   }
-  else {
-    res.render("main/error", { message: "用户没有登录" });
-  }
-});
+);
 
-
-router.get("/user/:username", function (req, res) {
-  let name = req.params.username;
-  userModel.findOne({ username: name }, (err, specificuser) => {
-    if (err) {
-      return res.render("main/error", { message: err });
-    }
-    if (specificuser == null) {
-      return res.render("main/error", { message: "该用户不存在！" });
+router.get("/useredit/:user", (req, res) => {
+  let userId = req.params.user;
+  let code = 0;
+  if (req.user) {
+    if (userId == 'me' || req.user._id == userId) {
+      userId = req.user._id;
+      code = 1;
     } else {
-      pagination({
-        limit: 2,
-        model: contentModel,
-        url: "/",
-        ejs: "main/index",
-        where: { author: specificuser._id },
-        res: res,
-        req: req,
-        populate: ["category", "author"],
-        // 其他数据
-        data: {}
+      followModel.findOne({ userId: req.user._id, followId: userId }, (err, result) => {
+        if (result) {
+          code = 3;
+        } else {
+          code = 2;
+        }
       });
     }
-  })
-})
+  } else if (userId == 'me') {
+    return res.render("main/error", { message: "用户未登录！" });
+  }
+  userModel.findById(
+    userId,
+    {
+      // 去除保密字段
+      password: 0,
+      salt: 0,
+      hash: 0
+    }
+  )
+    .populate(["userInfo"])
+    .then(docs => {
+      if (!docs) {
+        res.render("main/error", { message: "没有该用户！" });
+      } else {
+        res.render("main/useredit", {
+          message: "返回我的信息",
+          code: code,
+          docs: docs
+        });
+      }
+    })
+    .catch(err => {
+      res.render("main/error", { message: err });
+    });
+}
+);
+
+
 
 router.get("/content/:username", (req, res)=>{
   let name = req.params.username;

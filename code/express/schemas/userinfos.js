@@ -14,8 +14,8 @@ module.exports = new mongoose.Schema({
     // 性别
     gender: {
         type: String,
-        enum: ["male", "female", "undefined"],
-        default: "undefined"
+        enum: ["male", "female"],
+        default: 'male'
     },
 
     // 个人描述

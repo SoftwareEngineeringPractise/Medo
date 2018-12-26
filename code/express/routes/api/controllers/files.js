@@ -54,6 +54,7 @@ module.exports.fileDeleteOne = function (req, res) {
   if (!req.params[0]) {
     return res.tools.setJson(404, 1, '没有找到需要删除的文件')
   }
+  console.log(req.params[0]);
   File.findOneAndRemove({'url': req.params[0]})
     .exec(function (err, file) {
       if (err) {

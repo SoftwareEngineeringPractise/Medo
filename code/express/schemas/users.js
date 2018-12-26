@@ -37,7 +37,7 @@ module.exports = new mongoose.Schema({
   avatarUrl: { type: String, default: "/public/imgs/avatar.jpg"},
   bgUrl: { type: String, default: "/public/imgs/bg.jpg" },
   tel: { type: String, default: "" },
-  motto: { type: String, default:"黄河之水天上来"},
+  motto: { type: String, default:"知易行难"},
   hash: String,
   salt: String, // 加盐验证
   isadmin: { type: Boolean, default: false },
