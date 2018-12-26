@@ -165,6 +165,7 @@ router.post("/users/login", function (req, res, next) {
       return res.send({ success: false, message: "authentication failed" });
     }
     if(user.status!=1){
+      console.log(user)
       return res.send({success:false, message:"email is not validated"});
     }
     req.login(user, loginErr => {
