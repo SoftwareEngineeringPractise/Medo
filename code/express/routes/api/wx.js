@@ -785,7 +785,7 @@ router.get(
         }
         let count = docs.length;
         if (count == 0) {
-          res.tools.setJson(400, 1, "没有记录！");
+          res.tools.setJson(200, 0, "没有记录！",[]);
           return;
         }
         let data = [];
