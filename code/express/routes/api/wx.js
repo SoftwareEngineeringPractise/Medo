@@ -1,4 +1,5 @@
 const express = require("express");
+const marked = require("marked");
 const userModel = require("../../models/user");
 const userinfoModel = require("../../models/userinfo");
 const contentModel = require("../../models/content");
@@ -19,7 +20,17 @@ const moment = require("moment");
 
 
 
-
+// Markdown Support
+marked.setOptions({
+  renderer: new marked.Renderer(),
+  gfm: true,
+  tables: false,
+  breaks: false,
+  pedantic: false,
+  sanitize: true,
+  smartLists: true,
+  smartypants: false
+});
 
 
 
@@ -288,7 +299,7 @@ router.get("/views", (req, res) => {
     return res.tools.setJson(400, 1, "该文章不存在！")
   }
   req
-  .checkParams("contentid", "没有该文章！")
+  .checkQuery("contentid", "没有该文章！")
   .notEmpty()
   .isLength({ min: 24, max:24 });
   var errors = req.validationErrors();
