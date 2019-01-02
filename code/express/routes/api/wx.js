@@ -25,40 +25,38 @@ const moment = require("moment");
 
 
 
+
+
 /**
- * 0. 小程序认证和信息修改
+ * 小程序认证和信息修改
  */
-// 微信小程序认证 请求参数:code,username 返回: token; 
-//TODO  每次认证前端将token更新缓存到本地,并且针对每个login required的请求的header添加一个字段 
-// 字段的键为Authorization，值为缓存的token
 router.post('/users/wei_xin/auth',
     ctrlUsers.authWithWeiXinApp
 )
 
 
-// 修改用户名 请求参数:name , 返回: 调试信息; 
-// TODO 此请求header需要加入Authorization，值为缓存的token
-router.put('/users/me/name',
+// 修改用户名
+router.post('/users/me/name',
     passport.authenticate('jwt', { session: false }),
     ctrlUsers.userUpdateName
 )
 
 // 修改手机号 请求参数:tel , 返回: 调试信息; 
 // TODO 此请求header需要加入Authorization，值为缓存的token
-router.put('/users/me/tel',
+router.post('/users/me/tel',
     passport.authenticate('jwt', { session: false }),
     ctrlUsers.userUpdateTel
 )
 // 修改邮箱 请求参数:email , 返回: 调试信息; 
 // TODO 此请求header需要加入Authorization，值为缓存的token
-router.put('/users/me/email',
+router.post('/users/me/email',
     passport.authenticate('jwt', { session: false }),
     ctrlUsers.userUpdateEmail
 )
 
 // 修改密码 请求参数:password , 返回: 调试信息;
 // TODO 此请求header需要加入Authorization，值为缓存的token
-router.put(
+router.post(
   "/users/me/password",
   passport.authenticate("jwt", { session: false }),
   ctrlUsers.userUpdatePassword
@@ -67,7 +65,7 @@ router.put(
 
 // 修改学校 参数 school 返回: 调试信息;
 // TODO 此请求header需要加入Authorization，值为缓存的token
-router.put(
+router.post(
   "/users/me/school",
   passport.authenticate("jwt", { session: false }),
   ctrlUsers.userUpdateSchool
@@ -76,7 +74,7 @@ router.put(
 
 // 修改院系 参数 department 返回: 调试信息;
 // TODO 此请求header需要加入Authorization，值为缓存的token
-router.put(
+router.post(
   "/users/me/department",
   passport.authenticate("jwt", { session: false }),
   ctrlUsers.userUpdateDepartment
@@ -145,6 +143,19 @@ router.get(
     if (userid === "me") {
       //登陆者信息
       userid = req.user._id;
+    } else{
+      req
+      .checkParams("id", "没有该实验室！")
+      .notEmpty()
+      .isLength({ min: 24, max:24 });
+      var errors = req.validationErrors();
+      if (errors) {
+        var messages = [];
+        errors.forEach(function (error) {
+          messages.push(error.msg);
+        });
+        return res.tools.setJson(400, 2, messages);
+      }
     }
     userModel
       .findOne(
@@ -162,13 +173,13 @@ router.get(
       .populate(["userInfo"])
       .then(docs => {
         if (!docs) {
-          res.tools.setJson(404, 2, "没有该用户！");
+          res.tools.setJson(400, 2, "没有该用户！");
         } else {
           res.tools.setJson(200, 0, "返回用户信息" + userid, docs);
         }
       })
       .catch(err => {
-        res.tools.setJson(404, 1, err);
+        res.tools.setJson(400, 1, err);
       });
   }
 );
@@ -187,7 +198,21 @@ router.get(
     if (userid === "me") {
       //登陆者信息
       userid = req.user._id;
+    } else{
+      req
+      .checkParams("id", "没有该实验室！")
+      .notEmpty()
+      .isLength({ min: 24, max:24 });
+      var errors = req.validationErrors();
+      if (errors) {
+        var messages = [];
+        errors.forEach(function (error) {
+          messages.push(error.msg);
+        });
+        return res.tools.setJson(400, 2, messages);
+      }
     }
+
     userModel
       .findOne(
         {
@@ -204,15 +229,15 @@ router.get(
       .populate(['userInfo'])
       .then(docs => {
         if (docs.userInfo.role != "Lab") {
-          res.tools.setJson(404, 2, "没有该研究所！");
+          res.tools.setJson(400, 2, "没有该研究所！");
         } else if (!docs) {
-          res.tools.setJson(404, 2, "没有该用户！");
+          res.tools.setJson(400, 2, "没有该用户！");
         } else {
               res.tools.setJson(200, 0, "返回研究所信息" + userid, {user:docs});
         }
       })
       .catch(err => {
-        res.tools.setJson(404, 1, err);
+        res.tools.setJson(400, 1, err);
       });
   }
 );
@@ -258,7 +283,22 @@ router.get(
 // 查看指定id公告接口
 
 router.get("/views", (req, res) => {
-  let contentid = req.query.contentid;
+  let contentid = req.query.contentid.trim() || "";
+  if(contentid == ""){
+    return res.tools.setJson(400, 1, "该文章不存在！")
+  }
+  req
+  .checkParams("contentid", "没有该文章！")
+  .notEmpty()
+  .isLength({ min: 24, max:24 });
+  var errors = req.validationErrors();
+  if (errors) {
+    var messages = [];
+    errors.forEach(function (error) {
+      messages.push(error.msg);
+    });
+    return res.tools.setJson(400, 2, messages);
+  }
   contentModel.findById(contentid).populate([
     "category",
     {
@@ -284,15 +324,31 @@ router.get("/views", (req, res) => {
 router.get(
   "/comment/:id",
   passport.authenticate("jwt", { session: false }),
-  (req, res) => {
+  (req, res, next) => {
     let userId = req.params.id || "";
     if(userId === "me"){
       userId = req.user._id;
+    } else {
+      req
+      .checkParams("id", "没有该用户！")
+      .notEmpty()
+      .isLength({ min: 24, max:24 });
+      var errors = req.validationErrors();
+      if (errors) {
+        var messages = [];
+        errors.forEach(function (error) {
+          messages.push(error.msg);
+        });
+        return res.tools.setJson(400, 2, messages);
+      }
     }
     userModel.findById(userId, (err, docs) => {
       if (!err) {
-        res.tools.setJson(200, 0, "用户评论" + userId, docs.comment);
-        return;
+        if(docs){
+          res.tools.setJson(200, 0, "用户评论" + userId, docs.comment);
+        } else{
+          return res.tools.setJson(400, 1, "该用户不存在！");
+        }
       } else {
         res, tools.setJson(500, 1, err);
         return;
@@ -315,10 +371,26 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     if (!req.user) {
-      res.tools.setJson(404, 1, "用户没有登录, 不能提交评论！");
+      res.tools.setJson(400, 1, "用户没有登录, 不能提交评论！");
     }
+    req
+    .checkParams("id", "没有该用户！")
+    .notEmpty()
+    .isLength({ min: 24, max:24 });
+    var errors = req.validationErrors();
+    if (errors) {
+      var messages = [];
+      errors.forEach(function (error) {
+        messages.push(error.msg);
+      });
+      return res.tools.setJson(400, 2, messages);
+    }
+
     let userId = req.params.id || "";
-    let comment = req.body.comment;
+    let comment = req.body.comment.trim() || "";
+    if(comment == ""){
+      return res.tools.setJson(400, 1, "评论不能为空！")
+    }
     // 构建评论结构
     let commentData = {
       username: req.user.username,
@@ -332,7 +404,7 @@ router.post(
         res.tools.setJson(200, 0, "评论提交成功");
         return;
       } else {
-        res, tools.setJson(404, 1, err);
+        res, tools.setJson(400, 1, err);
         return;
       }
     });
@@ -351,25 +423,48 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   (req, res, next) => {
     if (!req.user) {
-      res.tools.setJson(404, 1, "用户没有登录, 不能提交文章！");
+      return res.tools.setJson(400, 1, "用户没有登录, 不能提交文章！");
     }
-    let title = req.body.title;
-    let category = req.body.category;
-    let description = req.body.description;
-    let content = req.body.content;
+      req
+      .checkBody("category", "分类错误, 没有该分类")
+      .notEmpty()
+      .isLength({ min: 24, max:24 });
+      var errors = req.validationErrors();
+    // TODO title 字数限制
+    // TODO description 字数限制
+    let title = req.body.title.trim() || "";
+    let category = req.body.category.trim() || "";
+    let description = req.body.description.trim() || "";
+    let content = req.body.content.trim() || "";
     // 后端进行简单的验证
-    if (title === "") {
+    if (title == "") {
       // 如果标题为空，渲染错误页面
-      res.tools.setJson(404, 1, "标题不能为空");
+      res.tools.setJson(400, 1, "标题不能为空");
       return;
-    } else if (description === "") {
+    } else if (category == "") {
       // 如果简介为空，渲染错误页面
-      res.tools.setJson(404, 1, "简介不能为空");
+      res.tools.setJson(400, 1, "分类不能为空");
       return;
-    } else if (content === "") {
-      res.tools.setJson(404, 1, "正文不能为空");
+    } else if (errors) {
+      var messages = [];
+      errors.forEach(function (error) {
+        messages.push(error.msg);
+      });
+      return res.tools.setJson(400, 2, messages);
+    }
+    else if (description == "") {
+      // 如果简介为空，渲染错误页面
+      res.tools.setJson(400, 1, "简介不能为空");
+      return;
+    } else if (content == "") {
+      res.tools.setJson(400, 1, "正文不能为空");
       return;
     } else {
+      categoryModel.findById(category, (err, cate)=>{
+        if(!cate){
+          return res.tools.setJson(400, 1, "该分类不存在");
+        }
+      })
       // 一切正常，存入数据库
       contentModel.create(
         {
@@ -417,13 +512,28 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   (req, res, next) => {
     if (!req.user) {
-      res.tools.setJson(404, 1, "用户未登录！");
+      res.tools.setJson(400, 1, "用户未登录！");
       return;
     }
     userId = req.params.id || "";
+    if(req.user._id == userId){
+      return res.tools.setJson(400, 1, "关注失败,关注人不能是登录用户！")
+    }
+    req
+    .checkParams("id", "没有用户！")
+    .notEmpty()
+    .isLength({ min: 24, max:24 });
+    var errors = req.validationErrors();
+    if (errors) {
+      var messages = [];
+      errors.forEach(function (error) {
+        messages.push(error.msg);
+      });
+      return res.tools.setJson(400, 2, messages);
+    }
     userModel.findById({ _id: userId }, (err, user) => {
       if (!user) {
-        res.tools.setJson(404, 2, "没有该用户！");
+        res.tools.setJson(400, 2, "没有该用户！");
         return;
       }
       if (err) {
@@ -436,7 +546,7 @@ router.post(
       NewfollowModel.addTime = new Date();
       NewfollowModel.save(function(err, result) {
         if (err) {
-          res.tools.setJson(404, 1, err);
+          res.tools.setJson(400, 1, err);
           return;
         }
         res.tools.setJson(200, 0, "用户关注成功！");
@@ -450,13 +560,25 @@ router.post(
 // TODO 此请求id的header需要加入Authorization，值为缓存的token
 router.post("/follow/:id/delete", passport.authenticate("jwt", { session: false }),(req, res, next) => {
     if (!req.user) {
-        res.tools.setJson(404, 1, "用户未登录！");
+        res.tools.setJson(400, 1, "用户未登录！");
         return;
+    }
+    req
+    .checkParams("id", "没有该用户！")
+    .notEmpty()
+    .isLength({ min: 24, max:24 });
+    var errors = req.validationErrors();
+    if (errors) {
+      var messages = [];
+      errors.forEach(function (error) {
+        messages.push(error.msg);
+      });
+      return res.tools.setJson(400, 2, messages);
     }
     userId = req.params.id || "";
     userModel.findById({ _id: userId }, (err, user) => {
         if (!user) {
-            res.tools.setJson(404, 2, "没有该用户！");
+            res.tools.setJson(400, 2, "没有该用户！");
             return;
         }
         if (err) {
@@ -465,7 +587,7 @@ router.post("/follow/:id/delete", passport.authenticate("jwt", { session: false 
         }
         followModel.findOneAndDelete({ userId: req.user._id, followId: userId }, function (err, result) {
             if (err) {
-                res.tools.setJson(404, 1, err)
+                res.tools.setJson(400, 1, err)
                 return;
             }
             res.tools.setJson(200, 0, "用户取消关注成功！")
@@ -487,13 +609,25 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   (req, res, next) => {
     if (!req.user) {
-      res.tools.setJson(404, 1, "用户未登录！");
+      res.tools.setJson(400, 1, "用户未登录！");
       return;
+    }
+    req
+    .checkParams("id", "没有该文章！")
+    .notEmpty()
+    .isLength({ min: 24, max:24 });
+    var errors = req.validationErrors();
+    if (errors) {
+      var messages = [];
+      errors.forEach(function (error) {
+        messages.push(error.msg);
+      });
+      return res.tools.setJson(400, 2, messages);
     }
     contentId = req.params.id || "";
     contentModel.findById({ _id: contentId }, (err, content) => {
       if (!content) {
-        res.tools.setJson(404, 2, "没有该用户！");
+        res.tools.setJson(400, 2, "没有该文章！");
         return;
       }
       if (err) {
@@ -506,7 +640,7 @@ router.post(
       NewfavoriteModel.addTime = new Date();
       NewfavoriteModel.save(function(err, result) {
         if (err) {
-          res.tools.setJson(404, 1, err);
+          res.tools.setJson(400, 1, err);
           return;
         }
         res.tools.setJson(200, 0, "文章收藏成功！");
@@ -524,13 +658,25 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   (req, res, next) => {
     if (!req.user) {
-      res.tools.setJson(404, 1, "用户未登录！");
+      res.tools.setJson(400, 1, "用户未登录！");
       return;
+    }
+    req
+    .checkParams("id", "没有该文章！")
+    .notEmpty()
+    .isLength({ min: 24, max:24 });
+    var errors = req.validationErrors();
+    if (errors) {
+      var messages = [];
+      errors.forEach(function (error) {
+        messages.push(error.msg);
+      });
+      return res.tools.setJson(400, 2, messages);
     }
     contentId = req.params.id || "";
     contentModel.findById({ _id: contentId }, (err, content) => {
       if (!content) {
-        res.tools.setJson(404, 2, "没有该用户！");
+        res.tools.setJson(400, 2, "没有该文章！");
         return;
       }
       if (err) {
@@ -541,7 +687,7 @@ router.post(
         { userId: req.user._id, contentId: contentId },
         function(err, result) {
           if (err) {
-            res.tools.setJson(404, 1, err);
+            res.tools.setJson(400, 1, err);
             return;
           }
           res.tools.setJson(200, 0, "文章取消收藏成功！");
@@ -567,7 +713,7 @@ router.get(
       .populate(["userId", "followId"])
       .then(docs => {
         if (!docs) {
-          res.tools.setJson(404, 1, "没有记录！");
+          res.tools.setJson(400, 1, "没有记录！");
           return;
         }
         res.tools.setJson(200, 0, "关注用户返回成功！", docs);
@@ -594,7 +740,7 @@ router.get(
       .populate(["userId", "contentId"])
       .then(docs => {
         if (!docs) {
-          res.tools.setJson(404, 1, "没有记录！");
+          res.tools.setJson(400, 1, "没有记录！");
           return;
         }
         res.tools.setJson(200, 0, "收藏内容返回成功！", docs);
@@ -618,7 +764,7 @@ router.get(
   passport.authenticate("jwt", { session: false }),
   (req, res, next) => {
     if (!req.user) {
-      res.tools.setJson(404, 1, "用户未登录！");
+      res.tools.setJson(400, 1, "用户未登录！");
     }
     followModel
       .find({ userId: req.user._id })
@@ -626,7 +772,7 @@ router.get(
       .sort({ _id: -1 })
       .then(docs => {
         if (!docs) {
-          res.tools.setJson(404, 1, "没有记录！");
+          res.tools.setJson(400, 1, "没有记录！");
           return;
         }
         let count = docs.length;
@@ -670,7 +816,7 @@ router.get('/search/username/:q', (req, res, next)=>{
     docs
   ) {
     if (err) {
-      res.tools.setJson(404, 1, err);
+      res.tools.setJson(400, 1, err);
     }
     if (docs) {
       res.tools.setJson(200, 0, "success",docs);
@@ -686,7 +832,7 @@ router.get('/search/school/:q', (req, res, next) => {
     docs
   ) {
     if (err) {
-      res.tools.setJson(404, 1, err);
+      res.tools.setJson(400, 1, err);
     }
     if (docs) {
       res.tools.setJson(200, 0, "返回学校搜索结果成功", docs);
@@ -701,7 +847,7 @@ router.get('/search/department/:q', (req, res, next) => {
     { department: { $regex: query, $options: "i" } },
     function(err, docs) {
       if (err) {
-        res.tools.setJson(404, 1, err);
+        res.tools.setJson(400, 1, err);
       }
       if (docs) {
         res.tools.setJson(200, 0, "返回院系搜索结果成功", docs);
@@ -710,7 +856,105 @@ router.get('/search/department/:q', (req, res, next) => {
   );
 })
 
+// 加入关注 参数 加入关注的人的id
+ // TODO 此请求id的header需要加入Authorization，值为缓存的token
+ router.post(
+  "/follows/:id",
+  passport.authenticate("jwt", { session: false }),
+  (req, res, next) => {
+    if (!req.user) {
+      res.tools.setJson(400, 1, "用户未登录！");
+      return;
+    }
+    userId = req.params.id || "";
+    if(req.user._id == userId){
+      return res.tools.setJson(400, 1, "关注人不能是登录用户！")
+    }
+    req
+    .checkParams("id", "没有该用户！")
+    .notEmpty()
+    .isLength({ min: 24, max:24 });
+    var errors = req.validationErrors();
+    if (errors) {
+      var messages = [];
+      errors.forEach(function (error) {
+        messages.push(error.msg);
+      });
+      return res.tools.setJson(400, 2, messages);
+    }
+    userModel.findById({ _id: userId }, (err, user) => {
+      if (!user) {
+        res.tools.setJson(400, 2, "没有该用户！");
+        return;
+      }
+      if (err) {
+        res.tools.setJson(500, 1, err);
+        return;
+      }
+      followModel.findOne({userId:req.user._id, followId:userId},function(err, result) {
+        if (err) {
+          res.tools.setJson(400, 1, err);
+          return;
+        }
+        if(result){
+          return res.tools.setJson(200, 0, "查询用户是否关注id"+userId, {follow:true});
+        } else{
+          return res.tools.setJson(200, 0, "查询用户是否关注id"+userId, {follow:false});
+        }
 
+      });
+    });
+  }
+);
+ // 取消收藏 参数 收藏的文章id
+ // TODO 此请求id的header需要加入Authorization，值为缓存的token
+ router.post(
+  "/favorites/:id",
+  passport.authenticate("jwt", { session: false }),
+  (req, res, next) => {
+    if (!req.user) {
+      res.tools.setJson(400, 1, "用户未登录！");
+      return;
+    }
+    req
+    .checkParams("id", "没有该文章！")
+    .notEmpty()
+    .isLength({ min: 24, max:24 });
+    var errors = req.validationErrors();
+    if (errors) {
+      var messages = [];
+      errors.forEach(function (error) {
+        messages.push(error.msg);
+      });
+      return res.tools.setJson(400, 2, messages);
+    }
+    contentId = req.params.id || "";
+    contentModel.findById({ _id: contentId }, (err, content) => {
+      if (!content) {
+        res.tools.setJson(400, 2, "没有该文章！");
+        return;
+      }
+      if (err) {
+        res.tools.setJson(500, 1, err);
+        return;
+      }
+      favoriteModel.findOne(
+        { userId: req.user._id, contentId: contentId },
+        function(err, result) {
+          if (err) {
+            res.tools.setJson(400, 1, err);
+            return;
+          }
+          if(result){
+            return res.tools.setJson(200, 0, "查询用户是否收藏文章id"+contentId, {follow:true});
+          } else{
+            return res.tools.setJson(200, 0, "查询用户是否收藏文章id"+contentId, {follow:false});
+          }
+        }
+      );
+    });
+  }
+);
 
 /**
  * 活动文件服务

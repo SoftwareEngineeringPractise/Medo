@@ -9,7 +9,6 @@ const LocalStrategy = require("passport-local");
 const userModel = mongoose.model('user');
 const emailModel = mongoose.model('emailvalidation');
 const config = require('./config');
-
 const userinfoModel = mongoose.model('userinfo');
 
 
@@ -47,11 +46,11 @@ passport.use(
       req
         .checkBody("username", "输入无效用户名,用户名至少为6位")
         .notEmpty()
-        .isLength({ min: 2 });        
+        .isLength({ min: 6 });        
       req
         .checkBody("password", "输入无效密码,密码至少为4位")
         .notEmpty()
-        .isLength({ min: 4 });
+        .isLength({ min: 6 });
       var errors = req.validationErrors();
       if (errors) {
         var messages = [];
@@ -119,15 +118,15 @@ passport.use(
         return done(err, false);
       }
       if (jwtPayload) {
-        userModel.findOne({ _id: jwtPayload._id }, function(err, user) {
-          if (err) {
-            return done(err, false);
-          }
+        userModel.findOne({ _id: jwtPayload._id }).populate(["userInfo"]).then(user => {
           if (user) {
             done(null, user);
           } else {
             done(null, false);
           }
+        })
+        .catch(err => {
+          return done(err, false);
         });
       } else{
         return done(null, false);
