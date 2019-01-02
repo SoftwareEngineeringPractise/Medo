@@ -281,7 +281,6 @@ router.get(
         {
           path: "author",
           select: "username isadmin verified _id role",
-          options: { limit: 5 }
         }
       ],
       params: {}
