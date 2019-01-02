@@ -230,8 +230,6 @@ router.get(
           _id: userid
         },
         {
-          // 去除保密字段
-          _id: 0,
           password: 0,
           salt: 0,
           hash: 0
