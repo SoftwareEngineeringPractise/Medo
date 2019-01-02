@@ -755,6 +755,7 @@ router.get("/messages/approval", (req, res, next) => {
           let school = info.school;
           let department = info.department;
           let institute = info.institute;
+          let province = info.province;
           userModel.findById(userId, (err1, User) => {
             if (err1) {
               res.set("refresh", "3;url=/admin/content");
@@ -779,6 +780,8 @@ router.get("/messages/approval", (req, res, next) => {
                         cntuserInfo.school = school;
                         cntuserInfo.department = department;
                         cntuserInfo.institute = institute;
+                        cntuserInfo.province = province;
+                        cntuserInfo.description = description;
                         cntuserInfo.save();
                         File.findOneAndRemove({ url: info.verifyUrl },
                             (err1, imgfile) => {

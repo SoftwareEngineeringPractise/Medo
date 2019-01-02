@@ -94,14 +94,8 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="ProfileHeader-contentFooter"><button type="button" class="Button ProfileHeader-expandButton Button--plain"><svg
-                                                viewBox="0 0 10 6" class="Icon ProfileHeader-arrowIcon Icon--arrow"
-                                                style="height: 16px; width: 10px;" width="10" height="16" aria-hidden="true">
-                                                <title></title>
-                                                <g>
-                                                    <path d="M8.716.217L5.002 4 1.285.218C.99-.072.514-.072.22.218c-.294.29-.294.76 0 1.052l4.25 4.512c.292.29.77.29 1.063 0L9.78 1.27c.293-.29.293-.76 0-1.052-.295-.29-.77-.29-1.063 0z"></path>
-                                                </g>
-                                            </svg>查看详细资料</button>
+                                    <div class="ProfileHeader-contentFooter">
+                                        <%= docs.userInfo.description %>
                                         <div class="MemberButtonGroup ProfileButtonGroup ProfileHeader-buttons">
                                             <button type="button" userid="<%= docs._id %>" onclick="addToFollow(this)"
                                                 id="Follow" class="hide Button FollowButton Button--primary Button--blue"><span
@@ -118,6 +112,10 @@
                                                     <%if (docs.verified ) { %>
                                                         <button type="button" class="Button Button--blue">
                                                         <%= docs.userInfo.role %></button>
+                                                        <button type="button" class="Button Button--blue">
+                                                            <%= docs.userInfo.school %></button>
+                                                        <button type="button" class="Button Button--blue">
+                                                            <%= docs.userInfo.department %></button>
                                                         
                                                     <% } else { %>
                                                     <button type="button" id="Verification" onclick="window.location.href='/verification'" class="Button Button--grey Button--withIcon Button--withLabel"> 未认证</button>

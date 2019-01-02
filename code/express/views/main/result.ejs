@@ -17,7 +17,6 @@
                 </div>
 <div class="container-fluid">
 
-    <form method="post" id="upload-form" enctype="multipart/form-data">
         <div class="form-group">
             <label for="title">角色</label>
                             <select onChange="changeDepartSelect();" name="role" id="role" class="form-control">
@@ -52,18 +51,19 @@
             <select name="institute" id="institute" onChange="changeDepartSelect();" class="form-control">
                 </select>
         </div>
-        <div class="form-group">
-                <label for="decription">描述</label>
-                <input type="text" name="decription" class="form-control" id="decription" >
-            </div>
-        <div class="form-group">
-            <label for="file">证件照</label>
-            <input type="file" name="file" class="form-control" id="file" accept="image/png,image/jpeg">
-        </div>
-        <button type="submit" class="btn btn-primary">提交</button>
-    </form>
+        <button onclick="clksearch();" class="btn btn-primary">查询</button>
 </div>
-            </div>
+
+<div>
+
+        <div id="info">
+
+        </div>
+        <!-- Body&Content -->
+<div id="searchlist">
+
+</div>
+    </div>
         </div>
 
     </div>
@@ -11949,6 +11949,41 @@ function changeDepartSelect(){
   });
     
 }
+function clksearch(){
+    $.ajax({
+    type: "post",
+    async: true,
+    url: "/api/web/advancedsearch",
+    data: {province:$("#province").find("option:selected").val(),
+    school:$("#school").find("option:selected").val(),
+     department:$("#department").find("option:selected").val(),
+     role:$("#role").find("option:selected").val(),
+    },
+    dataType: "json",
+    success: function (result) {
+        $("#info").html('<h3>'+result.meta.message+'共有 ' +result.data.length+ '条结果' +'</h3>');
+      if (result.meta.code!=0) {
+      } else {
+        let  innerhtml = ""
+                                          
+        for(let i = 0; i < result.data.length;  i++) {
+            innerhtml = innerhtml + '<div class="well">'+
+            '<h3>'+
+                result.data[i].userId.username+
+            '</h3>'+
+            '<p>'+
+               result.data[i].description +
+            '</p>'+
+            '<a href="/user/"'  + result.data[i].userId._id +'>主页'+'</a>'+
+        '</div>'
+        }
+        $("#searchlist").html(innerhtml);
+    }
+
+    }
+});
+}
+
 
 function clearSelect(select) {//清空列表框中的信息
 	while(select.length > 0){

@@ -2,6 +2,7 @@ const express = require("express");
 const userModel = require("../../models/user");
 const contentModel = require("../../models/content");
 const categoryModel = require("../../models/category");
+const userInfoModel = require("../../models/userinfo");
 const favoriteModel = require("../../models/favorite");
 const followModel = require("../../models/follow");
 const pagination = require("../../modules/api_pagination");
@@ -76,6 +77,73 @@ router.post("/categories", (req, res, next) => {
         }
     });
 });
+
+router.post("/advancedsearch", function (req, res) {
+    let where = {};
+    let role = req.body.role|| "";
+    let school = req.body.school || "";
+    let province = req.body.province|| "";
+    let department = req.body.department|| "";
+    if(role != "") {
+        where['role'] = role;
+    }
+    if(province != "") {
+        where['province'] = province;
+    }
+    if(school != "") {
+        where['school'] = school;
+    }   
+    if(department != "") {
+        where['department'] = department;
+    }
+    userInfoModel
+      .find( where)
+      .populate({path:"userId", select:"username _id"})
+      .then(docs => {
+        if (!docs) {
+          res.tools.setJson(200, 1, "没有用户信息返回！");
+        } else {
+            console.log(docs);
+          res.tools.setJson(200, 0, "复杂检索用户信息返回成功！", docs);
+        }
+      })
+      .catch(err => {
+        res.tools.setJson(400, 1, err);
+      });
+  });
+  
+
+// 实验室信息
+router.post("/labinfo", (req, res, next) => {
+    let school = req.body.school || "";
+    let province = req.body.province|| "";
+    let department = req.body.department|| "";
+    let where = {role:'Lab'};
+    if(province != "") {
+        where['province'] = province;
+    }
+    if(school != "") {
+        where['school'] = school;
+    }   
+    if(department != "") {
+        where['department'] = department;
+    }
+    userInfoModel
+      .find( where, { // 去除保密字段
+           password: 0, salt: 0, hash: 0 })
+      .populate({path:"userId", select:"username _id"})
+      .then(docs => {
+        if (!docs) {
+          res.tools.setJson(200, 1, "没有实验室返回！");
+        } else {
+          res.tools.setJson(200, 0, "实验室信息返回成功！", docs);
+        }
+      })
+      .catch(err => {
+        res.tools.setJson(404, 1, err);
+      });
+}
+);
 
 // 评论
 router.get("/comment", (req, res) => {
