@@ -867,8 +867,7 @@ router.get('/search/department/:q', (req, res, next) => {
   );
 })
 
-// 加入关注 参数 加入关注的人的id
- // TODO 此请求id的header需要加入Authorization，值为缓存的token
+
  router.post(
   "/follows/:id",
   passport.authenticate("jwt", { session: false }),
@@ -917,8 +916,7 @@ router.get('/search/department/:q', (req, res, next) => {
     });
   }
 );
- // 取消收藏 参数 收藏的文章id
- // TODO 此请求id的header需要加入Authorization，值为缓存的token
+
  router.post(
   "/favorites/:id",
   passport.authenticate("jwt", { session: false }),
@@ -957,9 +955,9 @@ router.get('/search/department/:q', (req, res, next) => {
             return;
           }
           if(result){
-            return res.tools.setJson(200, 0, "查询用户是否收藏文章id"+contentId, {follow:true});
+            return res.tools.setJson(200, 0, "查询用户是否收藏文章id"+contentId, {favorite:true});
           } else{
-            return res.tools.setJson(200, 0, "查询用户是否收藏文章id"+contentId, {follow:false});
+            return res.tools.setJson(200, 0, "查询用户是否收藏文章id"+contentId, {favorite:false});
           }
         }
       );
