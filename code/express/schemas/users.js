@@ -32,7 +32,7 @@ const weiXinSchema = new mongoose.Schema({
 
 module.exports = new mongoose.Schema({
   username: { type: String, default: "" },
-  password: { type: String, default: "", select: false },
+  password: { type: String, default: ""},
   email: { type: String, default: ""},
   avatarUrl: { type: String, default: "/public/imgs/avatar.jpg" },
   bgUrl: { type: String, default: "/public/imgs/bg.jpg" },

@@ -10,8 +10,6 @@ const pagination = object => {
     page = Math.max(page, 1);
     let skip = (page - 1) * limit;
 
-
-    
     object.model
       .find(object.where, {
         // 去除保密字段

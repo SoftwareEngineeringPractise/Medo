@@ -63,7 +63,9 @@ module.exports.authWithWeiXinApp = function (req, res) {
 }
 
 
-
+/**
+ * 以下是微信加密数据解码实例代码
+ */
 module.exports.authWithWeiXinApp2= function (req, res) {
   const appId = config.wxAppId
   const appSecret = config.wxAppSecret
@@ -139,19 +141,34 @@ module.exports.authWithWeiXinApp2= function (req, res) {
 
 module.exports.userUpdateName = function (req, res) {
   if (req.user) {
-    let name = req.query.name;
-    
+    let name = req.body.name;
+    if(name == req.user.username){
+      return res.tools.setJson(400, 1, "用户名未修改！")
+    }
+  req
+    .checkBody("name", "输入无效用户名,用户名至少为6位")
+    .notEmpty()
+    .isLength({ min: 6 });
+
+  var errors = req.validationErrors();
+  if (errors) {
+    var messages = [];
+    errors.forEach(function (error) {
+      messages.push(error.msg);
+    });
+    return res.tools.setJson(400, 2, messages);
+  }
     userModel.findOne({username:name}, (err, user)=>{
       if(err){
-        res.tools.setJson(400, 1, err)
+        res.tools.setJson(200, 1, err)
       }
       if(user){
-        res.tools.setJson(400, 2, "该用户名已经被占用！")
+        res.tools.setJson(200, 2, "该用户名已经被占用！")
       }
       else{
-        userModel.findById(req.user._id,
+        userModel.findById(req.user._id, config.filter,
           (err, user) => {
-            user.name = req.query.name
+            user.username = name
             user.save(function (err, user) {
               if (err) {
                 return res.tools.setJson(400, 1, err)
@@ -171,9 +188,24 @@ module.exports.userUpdateName = function (req, res) {
 
 module.exports.userUpdateTel = function (req, res) {
   if (req.user) {
-    userModel.findById(req.user._id, (err, user)=>{
-      console.log(req)
-      user.tel = req.query.tel;
+    let tel = req.body.tel;
+    if(tel == req.user.tel){
+      return res.tools.setJson(400, 1, "手机号未修改！")
+    }
+    req.checkBody(
+      "tel",
+      "输入无效手机号码,手机号码为中国大陆手机号码！")
+      .isMobilePhone("zh-CN");
+    var errors = req.validationErrors();
+    if (errors) {
+      var messages = [];
+      errors.forEach(function (error) {
+        messages.push(error.msg);
+      });
+      return res.tools.setJson(400, 2, messages);
+    }
+    userModel.findById(req.user._id, config.filter,(err, user)=>{
+      user.tel = req.body.tel;
       user.save(function (err, user) {
         if (err) {
           return res.tools.setJson(400, 1, err);
@@ -189,8 +221,26 @@ module.exports.userUpdateTel = function (req, res) {
 
 module.exports.userUpdateEmail = function (req, res) {
   if (req.user) {
-    userModel.findById(req.user._id,(err, user)=> {
-      user.email = req.query.email;
+    let email = req.body.email;
+    if(email == req.user.email){
+      return res.tools.setJson(400, 1, "邮箱未修改！")
+    }
+
+    req.
+    checkBody(
+      'email', '输入无效email,email格式为example@example.com')
+      .notEmpty()
+      .isEmail();
+      var errors = req.validationErrors();
+      if (errors) {
+        var messages = [];
+        errors.forEach(function (error) {
+          messages.push(error.msg);
+        });
+        return res.tools.setJson(400, 2, messages);
+      }
+    userModel.findById(req.user._id,config.filter,(err, user)=> {
+      user.email = email;
       user.save(function (err, user) {
         if (err) {
           return res.tools.setJson(400, 1, err);
@@ -206,14 +256,31 @@ module.exports.userUpdateEmail = function (req, res) {
 
 module.exports.userUpdatePassword = function(req, res) {
   if (req.user) {
-    userModel.findById(req.user._id,(err, user) =>{
-      user.password = req.query.password;
-      user.setPassword(req.query.password);
-      user.save(function(err, user) {
+    let password = req.body.password;
+    if(password == req.user.password){
+      return res.tools.setJson(400, 1, "密码未修改！")
+    }
+    req
+    .checkBody("password", "输入无效密码,密码至少为6位")
+    .notEmpty()
+    .isLength({ min: 6 });
+    var errors = req.validationErrors();
+    if (errors) {
+      var messages = [];
+      errors.forEach(function (error) {
+        messages.push(error.msg);
+      });
+      return res.tools.setJson(400, 2, messages);
+    }
+    userModel.findById(req.user._id, config.filter, (err, user) =>{
+      const tmp = user.toJSON();
+      user.password = password;
+      user.setPassword(password);
+      user.save(function(err, newuser) {
         if (err) {
           return res.tools.setJson(400, 1, err);
         } else {
-          return res.tools.setJson(200, 0, "success", { user: user });
+          return res.tools.setJson(200, 0, "success", { 'user': tmp });
         }
       });
     });
@@ -224,8 +291,22 @@ module.exports.userUpdatePassword = function(req, res) {
 
 module.exports.userUpdateSchool = function (req, res) {
   if (req.user) {
-    userinfoModel.findOne({userId:req.user._id},(err, user)=> {
-      user.school = req.query.school;
+    console.log(req.user);
+    let school = req.body.school;
+    if(school == req.user.userInfo.school){
+      return res.tools.setJson(400, 1, "学校未修改！")
+    }
+    // 需要验证school的正确性
+    var errors = req.validationErrors();
+    if (errors) {
+      var messages = [];
+      errors.forEach(function (error) {
+        messages.push(error.msg);
+      });
+      return res.tools.setJson(400, 2, messages);
+    }
+    userinfoModel.findOne({userId:req.user._id},config.filter,(err, user)=> {
+      user.school = school;
       user.save(function(err, user) {
         if (err) {
           return res.tools.setJson(400, 1, err);
@@ -241,8 +322,21 @@ module.exports.userUpdateSchool = function (req, res) {
 
 module.exports.userUpdateDepartment = function (req, res) {
   if (req.user) {
-    userinfoModel.findOne({ userId: req.user._id },(err, user)=> {
-      user.department = req.query.department;
+    let department = req.body.department;
+    if(department == req.user.userInfo.department){
+      return res.tools.setJson(400, 1, "院系未修改！")
+    }
+    // TODO 需要验证department的正确性
+    var errors = req.validationErrors();
+    if (errors) {
+      var messages = [];
+      errors.forEach(function (error) {
+        messages.push(error.msg);
+      });
+      return res.tools.setJson(400, 2, messages);
+    }
+    userinfoModel.findOne({ userId: req.user._id },config.filter,(err, user)=> {
+      user.department = department;
       user.save(function (err, user) {
         if (err) {
           return res.tools.setJson(400, 1, err);
