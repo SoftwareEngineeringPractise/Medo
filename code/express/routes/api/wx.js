@@ -230,8 +230,6 @@ router.get(
           _id: userid
         },
         {
-          // 去除保密字段
-          _id: 0,
           password: 0,
           salt: 0,
           hash: 0
@@ -837,33 +835,36 @@ router.get('/search/username/:q', (req, res, next)=>{
 // 按学校搜索 参数 q 返回 学校包含字符串q的所有userspace
 router.get('/search/school/:q', (req, res, next) => {
   let query = req.params.q || "";
-  userinfoModel.find({ school: { $regex: query, $options: "i" } }, function (
-    err,
-    docs
-  ) {
-    if (err) {
-      res.tools.setJson(400, 1, err);
-    }
-    if (docs) {
+  userinfoModel.find({ school: { $regex: query, $options: "i" } })
+  .populate({path:"userId", select:"username _id"})
+  .then(docs => {
+    if (!docs) {
+      res.tools.setJson(200, 1, "没有用户信息返回！");
+    } else {
+        console.log(docs);
       res.tools.setJson(200, 0, "返回学校搜索结果成功", docs);
     }
+  })
+  .catch(err => {
+    res.tools.setJson(400, 1, err);
   });
+  
 })
 
 // 按院系搜索 参数 q  返回 院系包含字符串q的所有userspace
 router.get('/search/department/:q', (req, res, next) => {
   let query = req.params.q || "";
   userinfoModel.find(
-    { department: { $regex: query, $options: "i" } },
-    function(err, docs) {
-      if (err) {
-        res.tools.setJson(400, 1, err);
-      }
-      if (docs) {
+    { department: { $regex: query, $options: "i" } })
+    .populate({path:"userId", select:"username _id"})
+    .then(docs => {
+      if (!docs) {
+        res.tools.setJson(200, 1, "没有用户信息返回！");
+      } else {
+          console.log(docs);
         res.tools.setJson(200, 0, "返回院系搜索结果成功", docs);
       }
-    }
-  );
+    })
 })
 
 
