@@ -291,7 +291,6 @@ module.exports.userUpdatePassword = function(req, res) {
 
 module.exports.userUpdateSchool = function (req, res) {
   if (req.user) {
-    console.log(req.user);
     let school = req.body.school;
     if(school == req.user.userInfo.school){
       return res.tools.setJson(400, 1, "学校未修改！")
