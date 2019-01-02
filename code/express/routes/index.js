@@ -123,10 +123,12 @@ router.post("/verification", uploadActivity.single("file"), function (req, res) 
         } else {
           newverification.verifyUrl = url;
           newverification.userId = req.user._id;
+          newverification.province = req.body.province;
           newverification.school = req.body.school;
           newverification.department = req.body.department;
           newverification.institute = req.body.institute;
           newverification.role = req.body.role;
+          newverification.description = req.body.description;
           newverification.save();
           res.set("refresh", "3;url=/user/me");
           return res.render("main/redirect", {
@@ -392,6 +394,89 @@ router.get("/views", (req, res) => {
     content.save();
   });
 });
+
+
+// 按用户名搜索 参数 q 返回 用户名包含字符串q的所有userspace
+router.get('/advancedsearch', (req, res, next)=>{ 
+    if (req.user) {
+      userModel
+        .findById(req.user, {
+          // 去除保密字段
+          password: 0,
+          salt: 0,
+          hash: 0
+        })
+        .populate(["userInfo"])
+        .then(docs => {
+          if (!docs) {
+            res.render("main/error", { message: "没有该用户！" });
+          } else {
+            res.render("main/result", {
+              message: "返回我的信息",
+              code: 1,
+              docs: docs
+            });
+          }
+        })
+        .catch(err => {
+          res.render("main/error", { message: err });
+        });
+    } else {
+      return res.render("main/result");
+    }
+  });
+
+
+// 按用户名搜索 参数 q 返回 用户名包含字符串q的所有userspace
+router.get('/search', (req, res, next)=>{ 
+  let query = req.query.q || "";
+  let where = { username: { $regex: query, $options: "i" } }
+  pagination({
+    limit: 10,
+    model: userModel,
+    url: "/",
+    ejs: "main/result",
+    where: where,
+    res: res,
+    req: req,
+    populate: ["userInfo"],
+    // 其他数据
+    data: {},
+  });
+})
+
+// 按学校搜索 参数 q 返回 学校包含字符串q的所有userspace
+router.get('/search/school/:q', (req, res, next) => {
+  let query = req.params.q || "";
+  userinfoModel.find({ school: { $regex: query, $options: "i" } }, function (
+    err,
+    docs
+  ) {
+    if (err) {
+      res.tools.setJson(400, 1, err);
+    }
+    if (docs) {
+      res.tools.setJson(200, 0, "返回学校搜索结果成功", docs);
+    }
+  });
+})
+
+// 按院系搜索 参数 q  返回 院系包含字符串q的所有userspace
+router.get('/search/department/:q', (req, res, next) => {
+  let query = req.params.q || "";
+  userinfoModel.find(
+    { department: { $regex: query, $options: "i" } },
+    function(err, docs) {
+      if (err) {
+        res.tools.setJson(400, 1, err);
+      }
+      if (docs) {
+        res.tools.setJson(200, 0, "返回院系搜索结果成功", docs);
+      }
+    }
+  );
+})
+
 
 // 将其暴露给外部使用
 module.exports = router;

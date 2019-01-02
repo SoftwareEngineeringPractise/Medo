@@ -23,7 +23,11 @@ module.exports = new mongoose.Schema({
     type: String,
     default: ""
   },
-
+  // 省份
+  province:{
+    type:String,
+    default:""
+  },
   // 学校
   school: {
     type: String,

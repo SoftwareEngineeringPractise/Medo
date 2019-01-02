@@ -12,6 +12,8 @@ module.exports = new mongoose.Schema({
     role: String,
     school: String,
     department: String,
+    province: String,
+    description: String,
     institute: String,
     verifyUrl: String,
     addTime: {
