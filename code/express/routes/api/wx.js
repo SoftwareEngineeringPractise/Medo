@@ -784,6 +784,10 @@ router.get(
           return;
         }
         let count = docs.length;
+        if (count == 0) {
+          res.tools.setJson(400, 1, "没有记录！");
+          return;
+        }
         let data = [];
         docs.forEach(item => {
           contentModel.find({ author: item.followId }, (err, content) => {
