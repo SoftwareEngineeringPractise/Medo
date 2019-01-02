@@ -815,7 +815,6 @@ router.get('/search/username/:q', (req, res, next)=>{
   let query = req.params.q || "";
   userModel.find({ username: { $regex: query, $options: "i" } }, {
     // 去除保密字段
-    _id: 0,
     password: 0,
     salt: 0,
     hash: 0
@@ -836,7 +835,7 @@ router.get('/search/username/:q', (req, res, next)=>{
 router.get('/search/school/:q', (req, res, next) => {
   let query = req.params.q || "";
   userinfoModel.find({ school: { $regex: query, $options: "i" } })
-  .populate({path:"userId", select:"username _id"})
+  .populate({path:"userId", select:"username _id verified"})
   .then(docs => {
     if (!docs) {
       res.tools.setJson(200, 1, "没有用户信息返回！");
@@ -856,7 +855,7 @@ router.get('/search/department/:q', (req, res, next) => {
   let query = req.params.q || "";
   userinfoModel.find(
     { department: { $regex: query, $options: "i" } })
-    .populate({path:"userId", select:"username _id"})
+    .populate({path:"userId", select:"username _id verified"})
     .then(docs => {
       if (!docs) {
         res.tools.setJson(200, 1, "没有用户信息返回！");
