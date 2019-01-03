@@ -784,6 +784,13 @@ router.get(
           return;
         }
         let count = docs.length;
+        if (count == 0) {
+
+          res.tools.setJson(400, 1, "没有记录！");
+
+          return;
+
+        }
         let data = [];
         docs.forEach(item => {
           contentModel.find({ author: item.followId }, (err, content) => {
@@ -815,7 +822,7 @@ router.get('/search/username/:q', (req, res, next)=>{
   let query = req.params.q || "";
   userModel.find({ username: { $regex: query, $options: "i" } }, {
     // 去除保密字段
-    _id: 0,
+   // _id: 0,
     password: 0,
     salt: 0,
     hash: 0
